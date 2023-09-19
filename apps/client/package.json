@@ -21,7 +21,6 @@
     "@nextui-org/theme": "2.1.6",
     "@react-aria/ssr": "^3.7.1",
     "@react-aria/visually-hidden": "^3.8.3",
-    "@trpc/client": "^10.38.3",
     "@trpc/server": "^10.38.3",
     "@types/node": "20.5.7",
     "@types/react": "18.2.21",
@@ -40,5 +39,8 @@
     "tailwind-variants": "^0.1.13",
     "tailwindcss": "3.3.3",
     "typescript": "5.0.4"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }

@@ -6,16 +6,10 @@ import { button as buttonStyles } from "@nextui-org/theme";
 import { siteConfig } from "@client/config/site";
 import { title, subtitle } from "@client/components/primitives";
 import { GithubIcon } from "@client/components/icons";
-import { trpc } from "@client/app/trpc";
-import ClientSide from "@client/components/clientside";
 
 export default async function Home() {
-  const { greeting } = await trpc.hello.query({ name: `Tom` });
-
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      {greeting}
-      <ClientSide />
       <div className="inline-block max-w-lg text-center justify-center">
         <h1 className={title()}>Make&nbsp;</h1>
         <h1 className={title({ color: "violet" })}>beautiful&nbsp;</h1>
