@@ -10,11 +10,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  username  String
+enum Role {
+  ADMIN
+  USER
+}
 
-  @@unique([username])
+model User {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  firstName      String?
+  lastName       String?
+  username       String?  @unique
+  email          String?  @unique
+  hashedPassword String?
+  avatar         String?
+  emailVerified  Boolean  @default(false)
+  role           Role     @default(USER)
+  active         Boolean  @default(false)
+  trash          Boolean  @default(false)
+
+  @@index([username, email, emailVerified, active, trash])
 }

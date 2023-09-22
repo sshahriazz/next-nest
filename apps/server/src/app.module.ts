@@ -5,13 +5,22 @@ import {
   QueryInfo,
   loggingMiddleware,
 } from 'nestjs-prisma';
-import { UsersModule } from './users/users.module';
 
 import { APP_FILTER, HttpAdapterHost } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import configuration from '../config';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
-    UsersModule,
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     PrismaModule.forRootAsync({
       isGlobal: true,
       //TODO: add env variables
@@ -24,13 +33,20 @@ import { APP_FILTER, HttpAdapterHost } from '@nestjs/core';
               `[Prisma Query] ${query.model}.${query.action} - ${query.executionTime}ms`,
           }),
         ],
-        prismaOptions: {
-          errorFormat: 'pretty',
-          log: ['warn', 'error'],
-        },
+        // prismaOptions: {
+        //   errorFormat: 'pretty',
+        //   log: ['warn', 'error'],
+        // },
         explicitConnect: true,
       }),
     }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env', '.env'],
+      load: [configuration],
+    }),
+    AuthModule,
+    UsersModule,
   ],
   providers: [
     {
