@@ -4,3 +4,6 @@ build
 .env
 # prisma migration files
 prisma/migrations
+documentation
+.DS_Store
+apps/.DS_Store

@@ -13,12 +13,13 @@ import { Token } from './entities/token.entity';
 import { PasswordService } from './password.service';
 import { UserEntity } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '@server/users/entities/user.entity';
+import { User, UserRole } from '@server/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 type JWTPayload = {
   userId: string;
   email: string;
+  role: UserRole;
   firstname: string;
   lastname: string;
 };
@@ -45,7 +46,7 @@ export class AuthService {
 
       return this.generateTokens({
         userId: user.id,
-        // role: user.role,
+        role: user.role,
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
@@ -77,6 +78,7 @@ export class AuthService {
     return this.generateTokens({
       userId: user.id,
       firstname: user.firstname,
+      role: user.role,
       lastname: user.lastname,
       email: user.email,
     });
@@ -122,6 +124,7 @@ export class AuthService {
       return this.generateTokens({
         userId,
         email,
+        role,
         firstname,
         lastname,
       });

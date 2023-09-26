@@ -13,35 +13,38 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChangePasswordInput } from './dto/change-password.input';
 
 @ApiBearerAuth()
-@Controller('users')
+@Controller('Users')
 @ApiTags('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Get()
-  // findAll() {
-  //   return this.usersService.findAll();
-  // }
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(id);
-  // }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
 
-  // @Patch(':id')
-  // update(
-  //   @Param('id', ParseIntPipe) id: string,
-  //   @Body() updateUserDto: UpdateUserInput,
-  // ) {
-  //   return this.usersService.update(id, updateUserDto);
-  // }
-  // @Patch('changepassword/:id')
-  // changePassword(@Body() changePassword: ChangePasswordInput) {
-  //   return this.usersService.changePassword(changePassword);
-  // }
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: string,
+    @Body() updateUserDto: UpdateUserInput,
+  ) {
+    return this.usersService.update(id, updateUserDto);
+  }
+  @Patch('changepassword/:id')
+  changePassword(
+    @Param('id') id: string,
+    @Body() changePassword: ChangePasswordInput,
+  ) {
+    return this.usersService.changePassword({ id, ...changePassword });
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.usersService.remove(id);
-  // }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
+  }
 }

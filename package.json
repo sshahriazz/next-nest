@@ -7,6 +7,7 @@
   "description": "",
   "scripts": {
     "dev": "pnpm run --parallel dev",
+    "doc:server": "pnpm run --filter=server doc",
     "dev:server": "pnpm run --filter=server dev",
     "dev:client": "pnpm run --filter=client dev",
     "build": "pnpm run --parallel build",

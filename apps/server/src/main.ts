@@ -12,6 +12,7 @@ import {
   SessionConfig,
 } from '@server/common/configs/config.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,6 +28,9 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
   app.use(compression());
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
 
   app.use(
     session({
@@ -50,5 +54,6 @@ async function bootstrap() {
   }
 
   await app.listen(nestConfig.port);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

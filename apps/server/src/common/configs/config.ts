@@ -7,6 +7,14 @@ const config: Config = {
   cors: {
     enabled: true,
   },
+  db: {
+    database: 'nest-next',
+    host: 'localhost',
+    password: 'polash',
+    port: 5432,
+    type: 'postgres',
+    username: 'polash',
+  },
   swagger: {
     enabled: true,
     title: 'Nestjs API',

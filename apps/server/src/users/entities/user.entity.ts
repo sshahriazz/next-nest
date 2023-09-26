@@ -1,9 +1,11 @@
 import { IsEmail } from 'class-validator';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
 export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
+  ADMIN = 'ADMIN',
+  USER = 'USER',
 }
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')

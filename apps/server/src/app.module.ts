@@ -1,25 +1,34 @@
-import { Module } from '@nestjs/common';
+import { Inject, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from '@server/common/configs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { DbConfig } from './common/configs/config.interface';
+import { JwtAuthGuard } from './auth/jwt.guard';
+import { RoleGuard } from './auth/role/role.guard';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
-      username: process.env.DATABASE_USER || 'polash',
-      password: process.env.DATABASE_PASSWORD || 'polash',
-      database: process.env.DATABASE_NAME || 'nest-next',
-      autoLoadEntities: true,
-      synchronize: true,
-      entities: ['dist/**/*.entity{.ts,.js}'],
+    TypeOrmModule.forRootAsync({
+      useFactory: (configService: ConfigService) => {
+        const config = configService.get<DbConfig>('db');
+        return {
+          type: 'postgres',
+          host: config.host,
+          port: config.port,
+          username: config.username,
+          password: config.password,
+          database: config.database,
+          autoLoadEntities: true,
+          synchronize: true,
+          entities: ['dist/**/*.entity{.ts,.js}'],
+        };
+      },
+      inject: [ConfigService],
     }),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -36,6 +45,14 @@ import { AuthModule } from './auth/auth.module';
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
