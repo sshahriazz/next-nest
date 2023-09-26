@@ -12,7 +12,7 @@ import {
   SessionConfig,
 } from '@server/common/configs/config.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +21,12 @@ async function bootstrap() {
   const corsConfig = configService.get<CorsConfig>('cors');
   const swaggerConfig = configService.get<SwaggerConfig>('swagger');
   const sessionConfig = configService.get<SessionConfig>('session');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+    }),
+  );
 
   if (corsConfig.enabled) {
     app.enableCors({ origin: '*' });
