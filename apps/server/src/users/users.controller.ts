@@ -13,8 +13,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChangePasswordInput } from './dto/change-password.input';
 
 @ApiBearerAuth()
-@Controller('Users')
-@ApiTags('users')
+@Controller('users')
+@ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

@@ -9,7 +9,7 @@ import { UserRole } from './users/entities/user.entity';
 export class AppController {
   @Version('1')
   @Get()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.USER)
   getHello(@Session() session: Record<string, any>) {
     session.visits = session.visits ? session.visits + 1 : 1;
     return { message: 'authenticated and visited:' + session.visits };

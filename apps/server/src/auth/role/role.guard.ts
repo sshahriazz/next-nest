@@ -12,7 +12,7 @@ export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   matchesRoles(roles: string[], userRole: string[]): boolean {
-    return JSON.stringify(roles) === JSON.stringify(userRole);
+    return userRole.every((role) => roles.includes(role));
   }
   canActivate(
     context: ExecutionContext,
@@ -32,13 +32,13 @@ export class RoleGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    const isPresent = this.matchesRoles(roles, [user.role]);
+    const isPresent = this.matchesRoles(roles, user.role);
 
     if (isPresent) {
       return true;
     } else {
       throw new ForbiddenException(
-        "You don't have permission to view this resource",
+        "You don't have permission to access this resource",
       );
     }
   }

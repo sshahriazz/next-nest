@@ -12,7 +12,7 @@ export class UpdateUserInput {
   @Length(3, 35)
   lastname: string;
 
-  @ApiProperty({ enum: UserRole, default: UserRole.USER })
+  @ApiProperty({ enum: [UserRole], default: [UserRole.USER] })
   @IsNotEmpty()
-  role: UserRole;
+  role: [UserRole];
 }

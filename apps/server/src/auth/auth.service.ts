@@ -19,7 +19,7 @@ import { Repository } from 'typeorm';
 type JWTPayload = {
   userId: string;
   email: string;
-  role: UserRole;
+  role: UserRole[];
   firstname: string;
   lastname: string;
 };
@@ -131,5 +131,8 @@ export class AuthService {
     } catch (e) {
       throw new UnauthorizedException();
     }
+  }
+  updateUserRole(userId: string, role: UserRole[]) {
+    return this.userRepository.update(userId, { role });
   }
 }

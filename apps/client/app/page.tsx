@@ -6,6 +6,7 @@ import { button as buttonStyles } from "@nextui-org/theme";
 import { siteConfig } from "@client/config/site";
 import { title, subtitle } from "@client/components/primitives";
 import { GithubIcon } from "@client/components/icons";
+import ProfileDropdown from "@client/components/profile-dropdown";
 
 export default async function Home() {
   return (

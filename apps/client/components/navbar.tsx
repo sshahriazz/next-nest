@@ -28,6 +28,7 @@ import {
 } from "@client/components/icons";
 
 import { Logo } from "@client/components/icons";
+import ProfileDropdown from "./profile-dropdown";
 
 export const Navbar = () => {
   const searchInput = (
@@ -83,7 +84,7 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal href={siteConfig.links.twitter} aria-label="Twitter">
+          {/* <Link isExternal href={siteConfig.links.twitter} aria-label="Twitter">
             <TwitterIcon className="text-default-500" />
           </Link>
           <Link isExternal href={siteConfig.links.discord} aria-label="Discord">
@@ -91,21 +92,13 @@ export const Navbar = () => {
           </Link>
           <Link isExternal href={siteConfig.links.github} aria-label="Github">
             <GithubIcon className="text-default-500" />
-          </Link>
+          </Link> */}
           <ThemeSwitch />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="hidden md:flex">
-          <Button
-            isExternal
-            as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
-            href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Sponsor
-          </Button>
+        {/* <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem> */}
+
+        <NavbarItem>
+          <ProfileDropdown />
         </NavbarItem>
       </NavbarContent>
 

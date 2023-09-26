@@ -1,11 +1,12 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginInput } from './dto/login.input';
 import { RefreshTokenInput } from './dto/refresh-token.input';
 import { SignupInput } from './dto/signup.input';
 import { UserEntity } from './entities/user.entity';
 import { IsPublic } from './public.decorator';
+import { UserRole } from '@server/users/entities/user.entity';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -47,5 +48,11 @@ export class AuthController {
   @ApiOkResponse({ type: UserEntity })
   async user(@Param('access_token') accessToken: string): Promise<UserEntity> {
     return await this.authService.getUserFromToken(accessToken);
+  }
+  @Post('update-role/:id')
+  @IsPublic()
+  @ApiBody({ enum: UserRole, isArray: true })
+  async updateRole(@Param('id') id: string, @Body() role: UserRole[]) {
+    return await this.authService.updateUserRole(id, role);
   }
 }
