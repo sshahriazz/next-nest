@@ -12,6 +12,9 @@ import { UpdateUserInput } from './dto/update-user.input';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChangePasswordInput } from './dto/change-password.input';
 
+import { UserRole } from './entities/user.entity';
+import { Roles } from '@server/auth/roles/roles.decorator';
+
 @ApiBearerAuth()
 @Controller('users')
 @ApiTags('Users')
@@ -19,6 +22,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  // @IsPublic()
+  @Roles(UserRole.USER)
   findAll() {
     return this.usersService.findAll();
   }

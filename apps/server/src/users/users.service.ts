@@ -12,11 +12,14 @@ export class UsersService {
     private passwordService: PasswordService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.userRepository.find();
   }
-  findOne(id: string) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    return await this.userRepository.findOne({
+      where: { id },
+      relationLoadStrategy: 'query',
+    });
   }
   async update(id: string, updateUserDto: UpdateUserInput) {
     return await this.userRepository.update(id, updateUserDto);
@@ -41,6 +44,6 @@ export class UsersService {
     });
   }
   async remove(id: string) {
-    return `This action removes a #${id} user`;
+    return await this.userRepository.delete(id);
   }
 }

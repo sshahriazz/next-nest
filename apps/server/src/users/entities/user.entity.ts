@@ -1,5 +1,6 @@
+import { IAms } from '@server/email/entity/iam.entity';
 import { IsEmail } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -31,4 +32,9 @@ export class User {
 
   @Column({ type: 'varchar' })
   password: string;
+
+  @OneToMany(() => IAms, (emailIAms) => emailIAms.user, {
+    cascade: true,
+  })
+  emailIAms: IAms[];
 }

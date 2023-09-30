@@ -1,7 +1,7 @@
-import { Inject, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from '@server/common/configs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { DbConfig } from './common/configs/config.interface';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { RoleGuard } from './auth/role/role.guard';
+import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -42,9 +44,14 @@ import { RoleGuard } from './auth/role/role.guard';
     ]),
     UsersModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_FILTER,
+      useClass: TypeOrmExceptionFilter,
+    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

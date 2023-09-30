@@ -1,3 +1,5 @@
+import { HttpStatus } from '@nestjs/common';
+
 export interface Config {
   nest: NestConfig;
   cors: CorsConfig;
@@ -42,4 +44,11 @@ export interface SecurityConfig {
   expiresIn: string;
   refreshIn: string;
   bcryptSaltOrRound: string | number;
+}
+
+export interface ResponseObject<T> {
+  message: string;
+  url: string;
+  data?: T;
+  status: HttpStatus;
 }
