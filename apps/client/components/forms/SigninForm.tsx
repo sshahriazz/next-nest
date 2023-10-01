@@ -2,17 +2,16 @@
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
 import { Formik } from "formik";
-import React from "react";
 import PasswordInput from "./PasswordInput";
 import { Link } from "@nextui-org/link";
 import NextLink from "next/link";
 import { Checkbox } from "@nextui-org/checkbox";
-import { string, ref, object } from "yup";
+import { string, object } from "yup";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import api, { privateApi, setAccessTokenHeader } from "@client/config/axios";
 import toast from "react-hot-toast";
-import { setCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
+import api, { setAccessTokenHeader } from "@client/config/axios";
+import secureLocalStorage from "react-secure-storage";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least one ${str} character`;
@@ -28,25 +27,25 @@ const SignupSchema = object().shape({
 });
 
 function SigninForm() {
-  const { mutateAsync, error, data } = useMutation({
+  const router = useRouter();
+  const { mutateAsync, isLoading } = useMutation({
     mutationFn: async (data: any) => {
       const { data: response } = await api.post("/auth/signin", data);
       return response;
     },
 
     onSuccess: (data) => {
-      if (data.code === "ERR_BAD_REQUEST") {
+      if (data?.code === "ERR_BAD_REQUEST") {
       } else {
-        setCookie(
-          "refreshToken",
-          JSON.stringify(data.data.tokens.refreshToken),
-          { httpOnly: true, secure: true }
-        );
         setAccessTokenHeader(data?.data?.tokens?.accessToken);
 
-        // privateApi.interceptors.request.eject(requestIntercept);
-        window.localStorage.setItem("user", JSON.stringify(data?.data?.user));
+        secureLocalStorage.setItem("user", JSON.stringify(data?.data?.user));
+        secureLocalStorage.setItem(
+          "credentials",
+          JSON.stringify(data?.data?.tokens?.accessToken)
+        );
         toast.success(data?.message);
+        router.push("/");
       }
     },
   });
@@ -98,7 +97,12 @@ function SigninForm() {
               Forgot Password?
             </Link>
           </div>
-          <Button type="submit" variant="flat" color="primary">
+          <Button
+            isLoading={isLoading}
+            type="submit"
+            variant="flat"
+            color="primary"
+          >
             Sign In
           </Button>
         </form>

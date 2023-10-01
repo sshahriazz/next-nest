@@ -17,6 +17,8 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import api from "@client/config/axios";
+import { useRouter } from "next/navigation";
+import secureLocalStorage from "react-secure-storage";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least 1 ${str} character`;
@@ -37,10 +39,18 @@ const SignupSchema = object().shape({
 });
 
 function SignupForm() {
-  const { mutateAsync, error, data } = useMutation({
+  const router = useRouter();
+
+  const { mutateAsync, isLoading } = useMutation({
     mutationFn: async (data: any) => {
       const { data: response } = await api.post("/auth/signup", data);
       return response;
+    },
+    onSuccess: (data) => {
+      if (data?.code === "ERR_BAD_REQUEST") {
+      } else {
+        router.push((secureLocalStorage.getItem("next") as string) ?? "/");
+      }
     },
   });
 
@@ -101,12 +111,14 @@ function SignupForm() {
             }
           />
           <div className="py-2 flex justify-between">
-            <Checkbox defaultSelected>Remember Me</Checkbox>
-            <Link href="/auth/password/reset" as={NextLink}>
-              Forgot Password?
-            </Link>
+            <Checkbox>I Accept Terms & Conditions</Checkbox>
           </div>
-          <Button type="submit" variant="flat" color="primary">
+          <Button
+            isLoading={isLoading}
+            type="submit"
+            variant="flat"
+            color="primary"
+          >
             Sign Up
           </Button>
         </form>

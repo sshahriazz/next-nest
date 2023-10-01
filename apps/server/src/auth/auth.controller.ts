@@ -54,20 +54,11 @@ export class AuthController {
   @IsPublic()
   async login(
     @Body() { email, password }: LoginInput,
-    @Res({ passthrough: true }) response: Response,
   ): Promise<ResponseObject<LoginResponse>> {
     const {
       tokens: { accessToken, refreshToken },
       user,
     } = await this.authService.login(email.toLowerCase(), password);
-
-    response.cookie('refresh_token', JSON.stringify(refreshToken), {
-      httpOnly: true,
-      path: '/',
-      sameSite: 'none',
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      secure: true,
-    });
 
     return {
       message: `${email} user logged in successfully`,
@@ -81,10 +72,8 @@ export class AuthController {
   }
   @Post('refresh-token')
   @IsPublic()
-  async refreshToken(@Req() req: Request) {
-    return this.authService.refreshToken(
-      req.headers.get('Cookie').split('=')[1],
-    );
+  async refreshToken(@Body() { token }: RefreshTokenInput) {
+    return this.authService.refreshToken(token);
   }
 
   @Get('user/:access_token')

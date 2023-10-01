@@ -11,7 +11,6 @@ import { DbConfig } from './common/configs/config.interface';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { RoleGuard } from './auth/role/role.guard';
 import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter';
-import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -44,7 +43,6 @@ import { EmailModule } from './email/email.module';
     ]),
     UsersModule,
     AuthModule,
-    EmailModule,
   ],
   controllers: [AppController],
   providers: [

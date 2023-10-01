@@ -15,6 +15,8 @@ import axios from "axios";
 import getQueryClient from "./getQueryClient";
 import { Toaster } from "react-hot-toast";
 import api from "@client/config/axios";
+import secureLocalStorage from "react-secure-storage";
+import { usePathname, useRouter } from "next/navigation";
 
 export interface ProvidersProps {
   children: React.ReactNode;

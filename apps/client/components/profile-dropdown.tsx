@@ -26,7 +26,6 @@ function ProfileDropdown() {
           className="h-14 gap-2"
         >
           <p className="font-semibold">Signed in as</p>
-          <p className="font-semibold">zoey@example.com</p>
         </DropdownItem>
         <DropdownItem textValue="My Settings" key="settings">
           My Settings
