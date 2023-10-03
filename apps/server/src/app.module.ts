@@ -11,6 +11,7 @@ import { DbConfig } from './common/configs/config.interface';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { RoleGuard } from './auth/role/role.guard';
 import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter';
+import { ResumeModule } from './resume/resume.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter'
     ]),
     UsersModule,
     AuthModule,
+    ResumeModule,
   ],
   controllers: [AppController],
   providers: [

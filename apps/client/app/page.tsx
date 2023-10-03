@@ -1,3 +1,4 @@
+"use client";
 import NextLink from "next/link";
 import { Link } from "@nextui-org/link";
 import { Snippet } from "@nextui-org/snippet";
@@ -8,7 +9,7 @@ import { title, subtitle } from "@client/components/primitives";
 import { GithubIcon } from "@client/components/icons";
 import ProfileDropdown from "@client/components/profile-dropdown";
 
-export default async function Home() {
+export default function Home() {
   return (
     <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
       <div className="inline-block max-w-lg text-center justify-center">

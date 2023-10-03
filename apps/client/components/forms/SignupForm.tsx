@@ -49,7 +49,7 @@ function SignupForm() {
     onSuccess: (data) => {
       if (data?.code === "ERR_BAD_REQUEST") {
       } else {
-        router.push((secureLocalStorage.getItem("next") as string) ?? "/");
+        router.push("/");
       }
     },
   });

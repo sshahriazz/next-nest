@@ -7,11 +7,11 @@ import { Link } from "@nextui-org/link";
 import NextLink from "next/link";
 import { Checkbox } from "@nextui-org/checkbox";
 import { string, object } from "yup";
-import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import api, { setAccessTokenHeader } from "@client/config/axios";
-import secureLocalStorage from "react-secure-storage";
+import { authApi, useSigninMutation } from "@client/services/auth";
+import { dispatch } from "@client/store";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least one ${str} character`;
@@ -28,35 +28,20 @@ const SignupSchema = object().shape({
 
 function SigninForm() {
   const router = useRouter();
-  const { mutateAsync, isLoading } = useMutation({
-    mutationFn: async (data: any) => {
-      const { data: response } = await api.post("/auth/signin", data);
-      return response;
-    },
-
-    onSuccess: (data) => {
-      if (data?.code === "ERR_BAD_REQUEST") {
-      } else {
-        setAccessTokenHeader(data?.data?.tokens?.accessToken);
-
-        secureLocalStorage.setItem("user", JSON.stringify(data?.data?.user));
-        secureLocalStorage.setItem(
-          "credentials",
-          JSON.stringify(data?.data?.tokens?.accessToken)
-        );
-        toast.success(data?.message);
-        router.push("/");
-      }
-    },
-  });
+  const [signin, { isLoading }] = useSigninMutation();
 
   return (
     <Formik
       initialValues={{ email: "", password: "" }}
       validationSchema={SignupSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        await mutateAsync(values);
-
+        const result: any = await signin(values);
+        if (result.data) {
+          toast.success(result.data.message);
+          router.push("/");
+        } else {
+          toast.error(result.error.data.message);
+        }
         setSubmitting(false);
       }}
     >

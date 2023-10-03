@@ -1,50 +1,34 @@
 "use client";
-
 import * as React from "react";
 import { NextUIProvider } from "@nextui-org/system";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeProviderProps } from "next-themes/dist/types";
-import {
-  QueryClient,
-  QueryClientProvider,
-  QueryFunction,
-  QueryKey,
-} from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import axios from "axios";
-import getQueryClient from "./getQueryClient";
 import { Toaster } from "react-hot-toast";
-import api from "@client/config/axios";
-import secureLocalStorage from "react-secure-storage";
-import { usePathname, useRouter } from "next/navigation";
+import ReduxProvider from "@client/store/ReduxProvider";
+import { PersistGate } from "redux-persist/integration/react";
+import { persister } from "@client/store";
 
 export interface ProvidersProps {
   children: React.ReactNode;
   themeProps?: ThemeProviderProps;
 }
 
-export const defaultQueryFn = async ({ queryKey }: any) => {
-  return await api.get(queryKey[0]);
-};
-
 export function Providers({ children, themeProps }: ProvidersProps) {
-  const [queryClient] = React.useState(
-    new QueryClient({
-      defaultOptions: {
-        queries: {
-          queryFn: defaultQueryFn,
-        },
-      },
-    })
-  );
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
-      <NextUIProvider>
-        <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
-      </NextUIProvider>
-      <Toaster />
-    </QueryClientProvider>
+    <ReduxProvider>
+      <PersistGate
+        loading={
+          <div className="flex justify-center items-center h-screen bg-gray-900">
+            <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-blue-500"></div>
+          </div>
+        }
+        persistor={persister}
+      >
+        <NextUIProvider>
+          <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+        </NextUIProvider>
+        <Toaster />
+      </PersistGate>
+    </ReduxProvider>
   );
 }

@@ -54,6 +54,7 @@ export class AuthController {
   @IsPublic()
   async login(
     @Body() { email, password }: LoginInput,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<ResponseObject<LoginResponse>> {
     const {
       tokens: { accessToken, refreshToken },

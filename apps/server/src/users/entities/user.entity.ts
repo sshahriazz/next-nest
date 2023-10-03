@@ -1,13 +1,21 @@
-import { IAms } from '@server/email/entity/iam.entity';
+import { Resume } from '@server/resume/entity/resume.entity';
 import { IsEmail } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
   USER = 'USER',
 }
 
-@Entity()
+@Entity('user')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -33,8 +41,11 @@ export class User {
   @Column({ type: 'varchar' })
   password: string;
 
-  @OneToMany(() => IAms, (emailIAms) => emailIAms.user, {
-    cascade: true,
-  })
-  emailIAms: IAms[];
+  @OneToOne(() => Resume, (resume) => resume.id, { cascade: true })
+  resume: Resume;
+
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
