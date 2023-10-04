@@ -22,7 +22,6 @@ import { CourseDto } from './dto/course.dto';
 import { InterestDto } from './dto/interest.dto';
 import { AdditionalDto } from './dto/additional.dto';
 import { EducationDto } from './dto/education.dto';
-import { IsPublic } from '@server/auth/public.decorator';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('resume')
@@ -42,7 +41,6 @@ export class ResumeController {
   }
 
   @Get()
-  @IsPublic()
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiQuery({ name: 'limit', type: Number, required: false })
   async allResume(
@@ -50,7 +48,7 @@ export class ResumeController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.allResume({
+    return await this.resumeService.findAllResumes({
       page,
       limit,
       route: 'http://loclahost:4000/resume',
@@ -76,8 +74,16 @@ export class ResumeController {
   }
 
   @Get('personal-info')
-  async allPersonalInfo() {
-    return await this.resumeService.allPersonalInfo();
+  async allPersonalInfo(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllPersonalInfo({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/personal-info',
+    });
   }
 
   @Put('summary/:id')
@@ -94,8 +100,16 @@ export class ResumeController {
   }
 
   @Get('summary')
-  async allSummary() {
-    return await this.resumeService.allSummary();
+  async allSummary(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllSummaries({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/summary',
+    });
   }
 
   @Post('experience-category/:id')
@@ -126,8 +140,16 @@ export class ResumeController {
   }
 
   @Get('experience-category')
-  async allExperienceCategory() {
-    return await this.resumeService.allExperienceCategory();
+  async allExperienceCategory(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllExperienceCategories({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/experience-category',
+    });
   }
 
   @Post('experience/:id')
@@ -152,8 +174,16 @@ export class ResumeController {
   }
 
   @Get('experience')
-  async allExperience() {
-    return await this.resumeService.allExperience();
+  async allExperience(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllExperiences({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/experience',
+    });
   }
 
   @Post('skill-category/:id')
@@ -178,8 +208,16 @@ export class ResumeController {
   }
 
   @Get('skill-category')
-  async allSkillCategory() {
-    return await this.resumeService.allSkillCategory();
+  async allSkillCategory(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllSkillCategories({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/skill-category',
+    });
   }
 
   @Post('skill/:id')
@@ -198,8 +236,16 @@ export class ResumeController {
   }
 
   @Get('skill')
-  async allSkill() {
-    return await this.resumeService.allSkill();
+  async allSkill(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllSkills({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/skill',
+    });
   }
 
   @Post('certificate/:id')
@@ -224,8 +270,16 @@ export class ResumeController {
   }
 
   @Get('certificate')
-  async allCertificate() {
-    return await this.resumeService.allCertificate();
+  async allCertificate(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllCertificates({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/certificate',
+    });
   }
 
   @Post('course/:id')
@@ -244,8 +298,16 @@ export class ResumeController {
   }
 
   @Get('course')
-  async allCourse() {
-    return await this.resumeService.allCourse();
+  async allCourse(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllCourses({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/course',
+    });
   }
 
   @Post('interest/:id')
@@ -264,8 +326,16 @@ export class ResumeController {
   }
 
   @Get('interest')
-  async allInterest() {
-    return await this.resumeService.allInterest();
+  async allInterest(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit = 5,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllInterests({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/interest',
+    });
   }
 
   @Post('additional/:id')
@@ -290,8 +360,16 @@ export class ResumeController {
   }
 
   @Get('additional')
-  async allAdditional() {
-    return await this.resumeService.allAdditional();
+  async allAdditional(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit = 5,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllAdditional({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/additional',
+    });
   }
 
   @Post('education/:id')
@@ -316,7 +394,15 @@ export class ResumeController {
   }
 
   @Get('education')
-  async allEducation() {
-    return await this.resumeService.allEducation();
+  async allEducation(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit = 5,
+  ) {
+    limit = limit > 100 ? 100 : limit;
+    return await this.resumeService.findAllEducations({
+      page,
+      limit,
+      route: 'http://loclahost:4000/resume/education',
+    });
   }
 }

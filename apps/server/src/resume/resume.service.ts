@@ -65,7 +65,8 @@ export class ResumeService {
       where: { id },
     });
   }
-  async allResume(options: IPaginationOptions) {
+
+  async findAllResumes(options: IPaginationOptions) {
     const queryBuilder = this.resumeRepository.createQueryBuilder('resume');
     queryBuilder.orderBy('resume.createdAt', 'DESC');
     return await paginate<Resume>(queryBuilder, options);
@@ -74,27 +75,38 @@ export class ResumeService {
   async updateResume(id: string, resume: ResumeDto) {
     return await this.resumeRepository.update(id, resume);
   }
+
   async updatePersonalInfo(id: string, personalInfo: PersonalInfoDto) {
     return await this.personalInfoRepository.update(id, personalInfo);
   }
+
   async getPersonalInfo(id: string) {
     return await this.personalInfoRepository.findOne({
       where: { id },
     });
   }
-  async allPersonalInfo() {
-    return await this.personalInfoRepository.find();
+
+  async findAllPersonalInfo(options: IPaginationOptions) {
+    const queryBuilder =
+      this.personalInfoRepository.createQueryBuilder('personal_info');
+    queryBuilder.orderBy('personal_info.createdAt', 'DESC');
+    return await paginate<PersonalInfo>(queryBuilder, options);
   }
+
   async updateSummary(id: string, summary: ProfessionalSummaryDto) {
     return await this.summaryRepository.update(id, summary);
   }
+
   async getSummary(id: string) {
     return await this.summaryRepository.findOne({
       where: { id },
     });
   }
-  async allSummary() {
-    return await this.summaryRepository.find();
+
+  async findAllSummaries(options: IPaginationOptions) {
+    const queryBuilder = this.summaryRepository.createQueryBuilder('summary');
+    queryBuilder.orderBy('summary.createdAt', 'DESC');
+    return await paginate<ProfessionalSummary>(queryBuilder, options);
   }
 
   async createExperienceCategory(
@@ -106,6 +118,7 @@ export class ResumeService {
       ...experienceCategory,
     });
   }
+
   async updateExperienceCategory(
     id: string,
     experienceCategory: ExperienceCategoryDto,
@@ -115,13 +128,18 @@ export class ResumeService {
       experienceCategory,
     );
   }
+
   async getExperienceCategory(id: string) {
     return await this.experienceCategoryRepository.findOne({
       where: { id },
     });
   }
-  async allExperienceCategory() {
-    return await this.experienceCategoryRepository.find();
+
+  async findAllExperienceCategories(options: IPaginationOptions) {
+    const queryBuilder =
+      this.experienceCategoryRepository.createQueryBuilder('category');
+    queryBuilder.orderBy('category.createdAt', 'DESC');
+    return await paginate<ExperienceCategory>(queryBuilder, options);
   }
 
   async createExperience(id: string, experience: ExperienceDto) {
@@ -130,6 +148,7 @@ export class ResumeService {
       ...experience,
     });
   }
+
   async updateExperience(id: string, experience: ExperienceDto) {
     return await this.experienceRepository.update(id, experience);
   }
@@ -140,8 +159,10 @@ export class ResumeService {
     });
   }
 
-  async allExperience() {
-    return await this.experienceRepository.find();
+  async findAllExperiences(options: IPaginationOptions) {
+    const queryBuilder = this.experienceRepository.createQueryBuilder('exp');
+    queryBuilder.orderBy('exp.createdAt', 'DESC');
+    return await paginate<Experience>(queryBuilder, options);
   }
 
   async createSkillCategory(id: string, skillCategory: SkillCategoryDto) {
@@ -161,8 +182,11 @@ export class ResumeService {
     });
   }
 
-  async allSkillCategory() {
-    return await this.skillCategoryRepository.find();
+  async findAllSkillCategories(options: IPaginationOptions) {
+    const queryBuilder =
+      this.skillCategoryRepository.createQueryBuilder('category');
+    queryBuilder.orderBy('category.createdAt', 'DESC');
+    return await paginate<SkillCategory>(queryBuilder, options);
   }
 
   async createSkill(id: string, skill: SkillDto) {
@@ -171,6 +195,7 @@ export class ResumeService {
       ...skill,
     });
   }
+
   async updateSkill(id: string, skill: SkillDto) {
     return await this.skillRepository.update(id, skill);
   }
@@ -181,8 +206,10 @@ export class ResumeService {
     });
   }
 
-  async allSkill() {
-    return await this.skillRepository.find();
+  async findAllSkills(options: IPaginationOptions) {
+    const queryBuilder = this.skillRepository.createQueryBuilder('skill');
+    queryBuilder.orderBy('skill.createdAt', 'DESC');
+    return await paginate<Skill>(queryBuilder, options);
   }
 
   async createCertificate(id: string, certificate: CertificateDto) {
@@ -191,6 +218,7 @@ export class ResumeService {
       ...certificate,
     });
   }
+
   async updateCertificate(id: string, certificate: CertificateDto) {
     return await this.certificateRepository.update(id, certificate);
   }
@@ -201,8 +229,11 @@ export class ResumeService {
     });
   }
 
-  async allCertificate() {
-    return await this.certificateRepository.find();
+  async findAllCertificates(options: IPaginationOptions) {
+    const queryBuilder =
+      this.certificateRepository.createQueryBuilder('certificate');
+    queryBuilder.orderBy('certificate.createdAt', 'DESC');
+    return await paginate<Certificate>(queryBuilder, options);
   }
 
   async createCourse(id: string, course: CourseDto) {
@@ -211,6 +242,7 @@ export class ResumeService {
       ...course,
     });
   }
+
   async updateCourse(id: string, course: CourseDto) {
     return await this.courseRepository.update(id, course);
   }
@@ -220,8 +252,11 @@ export class ResumeService {
       where: { id },
     });
   }
-  async allCourse() {
-    return await this.courseRepository.find();
+
+  async findAllCourses(options: IPaginationOptions) {
+    const queryBuilder = this.courseRepository.createQueryBuilder('course');
+    queryBuilder.orderBy('course.createdAt', 'DESC');
+    return await paginate<Course>(queryBuilder, options);
   }
 
   async createInterest(id: string, interest: InterestDto) {
@@ -230,6 +265,7 @@ export class ResumeService {
       ...interest,
     });
   }
+
   async updateInterest(id: string, interest: InterestDto) {
     return await this.interestRepository.update(id, interest);
   }
@@ -240,8 +276,10 @@ export class ResumeService {
     });
   }
 
-  async allInterest() {
-    return await this.interestRepository.find();
+  async findAllInterests(options: IPaginationOptions) {
+    const queryBuilder = this.interestRepository.createQueryBuilder('interest');
+    queryBuilder.orderBy('interest.createdAt', 'DESC');
+    return await paginate<Interest>(queryBuilder, options);
   }
 
   async createAdditional(id: string, additional: AdditionalDto) {
@@ -250,6 +288,7 @@ export class ResumeService {
       ...additional,
     });
   }
+
   async updateAdditional(id: string, additional: AdditionalDto) {
     return await this.additionalRepository.update(id, additional);
   }
@@ -260,8 +299,11 @@ export class ResumeService {
     });
   }
 
-  async allAdditional() {
-    return await this.additionalRepository.find();
+  async findAllAdditional(options: IPaginationOptions) {
+    const queryBuilder =
+      this.additionalRepository.createQueryBuilder('additional');
+    queryBuilder.orderBy('additional.createdAt', 'DESC');
+    return await paginate<Additional>(queryBuilder, options);
   }
 
   async createEducation(id: string, education: EducationDto) {
@@ -279,7 +321,9 @@ export class ResumeService {
       where: { id },
     });
   }
-  async allEducation() {
-    return await this.educationRepository.find();
+  async findAllEducations(options: IPaginationOptions) {
+    const queryBuilder = this.educationRepository.createQueryBuilder('edu');
+    queryBuilder.orderBy('edu.createdAt', 'DESC');
+    return await paginate<Education>(queryBuilder, options);
   }
 }
