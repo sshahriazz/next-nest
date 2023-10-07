@@ -1,11 +1,9 @@
 import { Resume } from '@server/resume/entity/resume.entity';
-import { IsEmail } from 'class-validator';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   OneToOne,
-  JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -21,8 +19,10 @@ export class User {
   id: string;
 
   @Column({ type: 'varchar', unique: true })
-  @IsEmail()
   email: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  phone: string;
 
   @Column({
     type: 'enum',
@@ -40,6 +40,18 @@ export class User {
 
   @Column({ type: 'varchar' })
   password: string;
+
+  @Column({ type: 'boolean', default: false })
+  emailVerified: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  is2fa: boolean;
+
+  @Column({ type: 'varchar', default: 'secret' })
+  secret2fa: string;
+
+  @Column({ type: 'boolean', default: false })
+  disableAccess: boolean;
 
   @OneToOne(() => Resume, (resume) => resume.id, { cascade: true })
   resume: Resume;

@@ -8,10 +8,13 @@ import NextLink from "next/link";
 import { Checkbox } from "@nextui-org/checkbox";
 import { string, object } from "yup";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { authApi, useSigninMutation } from "@client/services/auth";
 import { dispatch } from "@client/store";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { useAppSelector } from "@client/store/hooks";
+import React, { useEffect, useMemo } from "react";
+import { setCookie } from "cookies-next";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least one ${str} character`;
@@ -29,6 +32,15 @@ const SignupSchema = object().shape({
 function SigninForm() {
   const router = useRouter();
   const [signin, { isLoading }] = useSigninMutation();
+  const { user } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user?.email) {
+      console.log("called");
+
+      // router.replace("/");
+    }
+  }, [user]);
 
   return (
     <Formik
@@ -38,9 +50,21 @@ function SigninForm() {
         const result: any = await signin(values);
         if (result.data) {
           toast.success(result.data.message);
-          router.push("/");
+          setCookie("refreshToken", result.data.data.tokens.refreshToken, {
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            secure: true,
+          });
+          setCookie("accessToken", result.data.data.tokens.accessToken, {
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            secure: true,
+          });
+          // router.push("/");
         } else {
-          toast.error(result.error.data.message);
+          toast.error(
+            Array.isArray(result.error.data.message)
+              ? result.error.data.message[0].constraints
+              : result.error.data.message
+          );
         }
         setSubmitting(false);
       }}
@@ -53,7 +77,6 @@ function SigninForm() {
         handleBlur,
         handleSubmit,
         isSubmitting,
-        /* and other goodies */
       }) => (
         <form className="flex flex-col gap-4 mt-2" onSubmit={handleSubmit}>
           <Input
@@ -76,14 +99,14 @@ function SigninForm() {
             }
           />
 
-          <div className="py-2 flex justify-between">
+          <div className="py-2 flex gap-12 justify-between">
             <Checkbox defaultSelected>Remember Me</Checkbox>
             <Link href="/auth/password/reset" as={NextLink}>
               Forgot Password?
             </Link>
           </div>
           <Button
-            isLoading={isLoading}
+            isLoading={isSubmitting || isLoading}
             type="submit"
             variant="flat"
             color="primary"
@@ -96,4 +119,4 @@ function SigninForm() {
   );
 }
 
-export default SigninForm;
+export default React.memo(SigninForm);

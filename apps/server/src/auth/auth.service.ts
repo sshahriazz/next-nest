@@ -9,7 +9,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { SignupInput } from './dto/signup.input';
-import { SecurityConfig } from '@server/common/configs/config.interface';
+import {
+  NestConfig,
+  SecurityConfig,
+} from '@server/common/configs/config.interface';
 import { LoginResponse, SignupResponse, Token } from './entities/token.entity';
 import { PasswordService } from './password.service';
 import { UserEntity } from './entities/user.entity';
@@ -17,6 +20,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserRole } from '@server/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { MailerService } from '@server/mailer/mailer.service';
 
 type JWTPayload = {
   userId: string;
@@ -33,6 +37,7 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async createUser(payload: SignupInput): Promise<SignupResponse> {
@@ -117,13 +122,15 @@ export class AuthService {
   }
 
   private generateAccessToken(payload: JWTPayload): string {
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, {
+      expiresIn: '5s',
+    });
   }
 
   private generateRefreshToken(payload: { userId: string }): string {
     const securityConfig = this.configService.get<SecurityConfig>('security');
     return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
+      secret: 'refresh-secret',
       expiresIn: securityConfig.refreshIn,
     });
   }
@@ -131,9 +138,7 @@ export class AuthService {
   refreshToken(token: string) {
     try {
       const { userId, email, firstname, lastname, role } =
-        this.jwtService.verify(token, {
-          secret: this.configService.get('JWT_REFRESH_SECRET'),
-        });
+        this.jwtService.decode(token) as JWTPayload;
 
       return this.generateTokens({
         userId,
@@ -148,5 +153,61 @@ export class AuthService {
   }
   updateUserRole(userId: string, role: UserRole[]) {
     return this.userRepository.update(userId, { role });
+  }
+
+  async resetPassword(email: string, password: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const newPassword = bcrypt.hashSync(password, 10);
+    this.userRepository.update(user.id, { password: newPassword });
+  }
+
+  async verifyEmailAndUpdateUser(token: string) {
+    const valid = await this.jwtService.verify(token, {
+      secret: 'VERIFY_EMAIL_SECRET',
+    });
+    if (!valid) {
+      return false;
+    }
+    const decode = this.jwtService.decode(token);
+    const user = await this.userRepository.findOne({
+      where: { id: decode.sub },
+    });
+    if (!user) {
+      return false;
+    }
+    const update = await this.userRepository.update(user.id, {
+      emailVerified: true,
+    });
+    if (update.affected === 1) {
+      return true;
+    }
+    return false;
+  }
+
+  async verifyUserEmail(email: string, callback: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (user.emailVerified) {
+      throw new ConflictException('User already verified');
+    }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      emailVerified: true,
+    };
+
+    const generateSecretToken = this.jwtService.sign(payload, {
+      secret: 'VERIFY_EMAIL_SECRET',
+      expiresIn: '30m',
+    });
+    return `${
+      this.configService.get<NestConfig>('nest').url
+    }/auth/verify-email?verify=${generateSecretToken}&callback=${callback}`;
   }
 }

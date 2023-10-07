@@ -6,7 +6,14 @@ export interface Config {
   swagger: SwaggerConfig;
   security: SecurityConfig;
   db: DbConfig;
+  mail: MailConfig;
   session: SessionConfig;
+}
+export interface MailConfig {
+  clientId: string;
+  clientSecret: string;
+  email: string;
+  refreshToken: string;
 }
 
 export interface DbConfig {
@@ -20,6 +27,7 @@ export interface DbConfig {
 
 export interface NestConfig {
   port: number;
+  url: string;
 }
 
 export interface SessionConfig {

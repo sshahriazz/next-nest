@@ -9,6 +9,7 @@ import {
   BadRequestException,
   HttpException,
   Res,
+  Query,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -20,12 +21,16 @@ import { IsPublic } from './public.decorator';
 import { UserRole } from '@server/users/entities/user.entity';
 import { ResponseObject } from '@server/common/configs/config.interface';
 import { LoginResponse, SignupResponse, Token } from './entities/token.entity';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { MailerService } from '@server/mailer/mailer.service';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mailerService: MailerService,
+  ) {}
 
   @Post('signup')
   @IsPublic()
@@ -54,7 +59,6 @@ export class AuthController {
   @IsPublic()
   async login(
     @Body() { email, password }: LoginInput,
-    @Res({ passthrough: true }) res: Response,
   ): Promise<ResponseObject<LoginResponse>> {
     const {
       tokens: { accessToken, refreshToken },
@@ -71,9 +75,50 @@ export class AuthController {
       },
     };
   }
-  @Post('refresh-token')
+
+  @Get('send-verification-email')
   @IsPublic()
-  async refreshToken(@Body() { token }: RefreshTokenInput) {
+  async sendVerificationEmail(
+    @Query('email') email: string,
+    @Query('callback') callback: string,
+  ) {
+    const link = await this.authService.verifyUserEmail(email, callback);
+    await this.mailerService.sendMail(
+      {
+        name: email,
+        verificationLink: link,
+        companyName: 'Coding Ninja',
+      },
+      'action',
+      email,
+    );
+    return {
+      status: HttpStatus.OK,
+    };
+  }
+
+  @IsPublic()
+  @Get('verify-email')
+  async verifyEmail(
+    @Query('verify') token: string,
+    @Query('callback') callback: string,
+    @Query('failCallback') failCallback: string,
+    @Res() res: Response,
+  ) {
+    const isSuccess = await this.authService.verifyEmailAndUpdateUser(token);
+    if (isSuccess) {
+      return res.redirect(callback);
+    } else {
+      return res.redirect(failCallback);
+    }
+  }
+
+  @Get('refresh-token')
+  @IsPublic()
+  async refreshToken(@Req() req: Request) {
+    const refreshTokenString = req.headers['cookie'];
+    const token = refreshTokenString.split('=')[1].split(';')[0];
+
     return this.authService.refreshToken(token);
   }
 

@@ -8,17 +8,6 @@ export const siteConfig = {
       label: "Home",
       href: "/",
     },
-
-    {
-      label: "Signup",
-      href: "/auth/signup",
-    },
-
-    {
-      label: "Signin",
-      href: "/auth/signin",
-    },
-
     {
       label: "Change Password",
       href: "/auth/password/change",

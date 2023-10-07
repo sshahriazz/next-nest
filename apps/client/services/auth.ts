@@ -1,15 +1,20 @@
-// Need to use the React-specific entry point to import createApi
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import type { Pokemon } from "./types";
+import { baseApi } from "./api";
 
-// Define a service using a base URL and expected endpoints
-export const authApi = createApi({
-  reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://127.0.0.1:4000/auth" }),
+export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     signin: builder.mutation<any, { email: string; password: string }>({
       query: (body) => ({
-        url: "/signin",
+        url: "/auth/signin",
+        method: "POST",
+        body,
+      }),
+    }),
+    signup: builder.mutation<
+      any,
+      { firstname: string; lastname: string; email: string; password: string }
+    >({
+      query: (body) => ({
+        url: "auth/signup",
         method: "POST",
         body,
       }),
@@ -19,4 +24,4 @@ export const authApi = createApi({
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const { useSigninMutation } = authApi;
+export const { useSigninMutation, useSignupMutation } = authApi;

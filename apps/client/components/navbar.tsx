@@ -1,3 +1,4 @@
+"use client";
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -19,39 +20,15 @@ import NextLink from "next/link";
 import clsx from "clsx";
 
 import { ThemeSwitch } from "@client/components/theme-switch";
-import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
-  SearchIcon,
-} from "@client/components/icons";
+import { GithubIcon } from "@client/components/icons";
 
 import { Logo } from "@client/components/icons";
 import ProfileDropdown from "./profile-dropdown";
+import { useAppSelector } from "@client/store/hooks";
+import { Flex } from "./flex";
 
 export const Navbar = () => {
-  const searchInput = (
-    <Input
-      aria-label="Search"
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
-          K
-        </Kbd>
-      }
-      labelPlacement="outside"
-      placeholder="Search..."
-      startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
-  );
-
+  const { user } = useAppSelector((state) => state.auth);
   return (
     <NextUINavbar isBlurred isBordered maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -84,21 +61,32 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          {/* <Link isExternal href={siteConfig.links.twitter} aria-label="Twitter">
-            <TwitterIcon className="text-default-500" />
-          </Link>
-          <Link isExternal href={siteConfig.links.discord} aria-label="Discord">
-            <DiscordIcon className="text-default-500" />
-          </Link>
-          <Link isExternal href={siteConfig.links.github} aria-label="Github">
-            <GithubIcon className="text-default-500" />
-          </Link> */}
           <ThemeSwitch />
         </NavbarItem>
-        {/* <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem> */}
 
         <NavbarItem>
-          <ProfileDropdown />
+          {user.email ? (
+            <ProfileDropdown />
+          ) : (
+            <Flex gap="3">
+              <Button
+                as={NextLink}
+                href="/auth/signin"
+                color="primary"
+                variant="flat"
+              >
+                Sign In
+              </Button>
+              <Button
+                as={NextLink}
+                href="/auth/signup"
+                color="primary"
+                variant="ghost"
+              >
+                Sign Up
+              </Button>
+            </Flex>
+          )}
         </NavbarItem>
       </NavbarContent>
 
@@ -111,7 +99,7 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarMenu>
-        {searchInput}
+        {/* {searchInput} */}
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>

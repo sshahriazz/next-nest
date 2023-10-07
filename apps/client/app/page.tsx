@@ -1,13 +1,11 @@
-"use client";
-import NextLink from "next/link";
-import { Link } from "@nextui-org/link";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code";
-import { button as buttonStyles } from "@nextui-org/theme";
+import dynamic from "next/dynamic";
+import { subtitle, title } from "@client/components/primitives";
 import { siteConfig } from "@client/config/site";
-import { title, subtitle } from "@client/components/primitives";
-import { GithubIcon } from "@client/components/icons";
-import ProfileDropdown from "@client/components/profile-dropdown";
+import { button as buttonStyles } from "@nextui-org/theme";
+
+import { Snippet } from "@nextui-org/snippet";
+
+import { Code } from "@nextui-org/code";
 
 export default function Home() {
   return (
@@ -22,30 +20,6 @@ export default function Home() {
         <h2 className={subtitle({ class: "mt-4" })}>
           Beautiful, fast and modern React UI library.
         </h2>
-      </div>
-
-      <div className="flex gap-3">
-        <Link
-          isExternal
-          as={NextLink}
-          href={siteConfig.links.docs}
-          className={buttonStyles({
-            color: "primary",
-            radius: "full",
-            variant: "shadow",
-          })}
-        >
-          Documentation
-        </Link>
-        <Link
-          isExternal
-          as={NextLink}
-          className={buttonStyles({ variant: "bordered", radius: "full" })}
-          href={siteConfig.links.github}
-        >
-          <GithubIcon size={20} />
-          GitHub
-        </Link>
       </div>
 
       <div className="mt-8">

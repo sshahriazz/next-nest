@@ -8,14 +8,14 @@ import React from "react";
 
 async function SignUp() {
   return (
-    <div className="flex flex-col justify-center">
+    <div className="flex flex-col justify-center w-[400px]">
       <Logo className="self-center" size={150} />
-      <Card className="xl:w-1/3 md:w-1/2 mx-auto" classNames={{ base: "p-3" }}>
-        <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+      <Card className="p-2">
+        <CardHeader className="flex-col items-start ">
           <h1 className={title({ size: "sm", color: "blue" })}>Sign Up</h1>
           <h2 className={subtitle({})}>Sing Up with your email</h2>
         </CardHeader>
-        <CardBody className="overflow-hidden py-2">
+        <CardBody className="overflow-hidden">
           <SignupForm />
           <div className="flex gap-3 mt-3">
             <span>Already have an account?</span>

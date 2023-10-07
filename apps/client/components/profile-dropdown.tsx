@@ -7,8 +7,16 @@ import {
   DropdownTrigger,
 } from "@nextui-org/dropdown";
 import { Avatar } from "@nextui-org/avatar";
+import { useAppDispatch, useAppSelector } from "@client/store/hooks";
+import { signout } from "@client/features/authSlice";
 
 function ProfileDropdown() {
+  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+
+  function handleSignout() {
+    dispatch(signout());
+  }
   return (
     <Dropdown>
       <DropdownTrigger>
@@ -26,11 +34,17 @@ function ProfileDropdown() {
           className="h-14 gap-2"
         >
           <p className="font-semibold">Signed in as</p>
+          {user.email}
         </DropdownItem>
         <DropdownItem textValue="My Settings" key="settings">
           My Settings
         </DropdownItem>
-        <DropdownItem textValue="Log Out" key="logout" color="danger">
+        <DropdownItem
+          onClick={handleSignout}
+          textValue="Log Out"
+          key="logout"
+          color="danger"
+        >
           Log Out
         </DropdownItem>
       </DropdownMenu>

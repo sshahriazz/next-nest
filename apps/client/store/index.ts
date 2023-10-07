@@ -13,12 +13,15 @@ import {
   persistStore,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage/session";
+import { experienceApi } from "@client/services/resume/experience";
+import { baseApi } from "@client/services/api";
 
 const persistConfig = { key: "root", storage };
 
 const allReducers = {
   auth: authReducer,
-  [authApi.reducerPath]: authApi.reducer,
+  [baseApi.reducerPath]: baseApi.reducer,
+  // [experienceApi.reducerPath]: experienceApi.reducer,
 };
 const combinedReducer = combineReducers(allReducers);
 
@@ -32,7 +35,7 @@ const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(authApi.middleware),
+    }).concat(baseApi.middleware),
 });
 export const persister = persistStore(store);
 setupListeners(store.dispatch);

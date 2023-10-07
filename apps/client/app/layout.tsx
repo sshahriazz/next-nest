@@ -7,6 +7,7 @@ import { Navbar } from "@client/components/navbar";
 import { Link as NextLink } from "@nextui-org/link";
 import clsx from "clsx";
 import Link from "next/link";
+import GlobalMessage from "@client/components/global-message";
 
 export const metadata: Metadata = {
   title: {
@@ -41,6 +42,7 @@ export default function RootLayout({
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
+            <GlobalMessage />
             <Navbar />
             <main className="container mx-auto max-w-7xl pt-8 px-6 flex-grow">
               {children}

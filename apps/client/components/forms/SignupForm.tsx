@@ -2,23 +2,18 @@
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
 import { Formik } from "formik";
-import React from "react";
+import React, { memo, useEffect, useMemo } from "react";
 import PasswordInput from "./PasswordInput";
 import { Link } from "@nextui-org/link";
 import NextLink from "next/link";
 import { Checkbox } from "@nextui-org/checkbox";
 import { string, ref, object } from "yup";
 import { toast } from "react-hot-toast";
-import {
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import axios from "axios";
-import api from "@client/config/axios";
+
 import { useRouter } from "next/navigation";
-import secureLocalStorage from "react-secure-storage";
+import { useSignupMutation } from "@client/services/auth";
+import { useAppSelector } from "@client/store/hooks";
+import { setCookie } from "cookies-next";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least 1 ${str} character`;
@@ -33,38 +28,46 @@ const SignupSchema = object().shape({
     .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
   confirmPassword: string()
     .required("Please re-type your password")
-    // use oneOf to match one of the values inside the array.
-    // use "ref" to get the value of passwrod.
     .oneOf([ref("password")], "Passwords does not match"),
+  firstname: string()
+    .min(3, "Name must be at least 3 character")
+    .required("First Name Required"),
+  lastname: string()
+    .min(3, "Name must be at least 3 character")
+    .required("Last Name Required"),
 });
 
 function SignupForm() {
   const router = useRouter();
 
-  const { mutateAsync, isLoading } = useMutation({
-    mutationFn: async (data: any) => {
-      const { data: response } = await api.post("/auth/signup", data);
-      return response;
-    },
-    onSuccess: (data) => {
-      if (data?.code === "ERR_BAD_REQUEST") {
-      } else {
-        router.push("/");
-      }
-    },
-  });
+  const [signup, { isLoading }] = useSignupMutation();
+  const { user } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    if (user?.email) {
+      router.replace("/");
+    }
+  }, [user]);
 
   return (
     <Formik
-      initialValues={{ email: "", password: "", confirmPassword: "" }}
+      initialValues={{
+        firstname: "",
+        lastname: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      }}
       validationSchema={SignupSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        await mutateAsync({
-          firstname: "string",
-          lastname: "string",
-          ...values,
-        });
+        const result: any = await signup(values);
+        if (result.data) {
+          toast.success(result.data.message);
 
+          // router.push("/");
+        } else {
+          toast.error(result.error.data.message);
+        }
         setSubmitting(false);
       }}
     >
@@ -76,10 +79,36 @@ function SignupForm() {
         handleBlur,
         handleSubmit,
         isSubmitting,
-        /* and other goodies */
       }) => (
         <form className="flex flex-col gap-4 mt-2" onSubmit={handleSubmit}>
           <Input
+            id="firstname"
+            type="text"
+            name="firstname"
+            label="First Name"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.firstname}
+            errorMessage={
+              errors.firstname && touched.firstname && errors.firstname
+            }
+          />
+
+          <Input
+            id="lastname"
+            type="text"
+            name="lastname"
+            label="Last Name"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.lastname}
+            errorMessage={
+              errors.lastname && touched.lastname && errors.lastname
+            }
+          />
+
+          <Input
+            id="email"
             type="email"
             name="email"
             label="Email"
@@ -89,6 +118,7 @@ function SignupForm() {
             errorMessage={errors.email && touched.email && errors.email}
           />
           <PasswordInput
+            id="password"
             name="password"
             label="Password"
             onChange={handleChange}
@@ -99,6 +129,7 @@ function SignupForm() {
             }
           />
           <PasswordInput
+            id="confirmPassword"
             name="confirmPassword"
             label="Confirm Password"
             onChange={handleChange}
@@ -114,7 +145,7 @@ function SignupForm() {
             <Checkbox>I Accept Terms & Conditions</Checkbox>
           </div>
           <Button
-            isLoading={isLoading}
+            isLoading={isSubmitting || isLoading}
             type="submit"
             variant="flat"
             color="primary"
@@ -127,4 +158,4 @@ function SignupForm() {
   );
 }
 
-export default SignupForm;
+export default memo(SignupForm);

@@ -2,6 +2,7 @@ import { authApi } from "@client/services/auth";
 import type { RootState } from "@client/store";
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import { setCookie } from "cookies-next";
 
 // Define a type for the slice state
 interface AuthInterface {
@@ -26,10 +27,19 @@ export const authSlice = createSlice({
       state.user = action.payload;
     },
     setAccessToken: (state, action: PayloadAction<string>) => {
-      state.user.accessToken = action.payload;
+      console.log("setAccessToken", action.payload);
+
+      state.accessToken = action.payload;
     },
     setRefreshToken: (state, action: PayloadAction<string>) => {
-      state.user.refreshToken = action.payload;
+      state.refreshToken = action.payload;
+    },
+    signout: (state) => {
+      state.user = {};
+      state.accessToken = "";
+      state.refreshToken = "";
+      // setCookie("accessToken", null);
+      // setCookie("refreshToken", null);
     },
   },
   extraReducers: (builder) => {
@@ -44,7 +54,8 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setUser, setAccessToken, setRefreshToken } = authSlice.actions;
+export const { setUser, setAccessToken, setRefreshToken, signout } =
+  authSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectAuth = (state: RootState) => state.auth;
