@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "@client/features/authSlice";
+import resumeReducer from "@client/features/resumeSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { authApi } from "@client/services/auth";
 import {
@@ -20,6 +21,7 @@ const persistConfig = { key: "root", storage };
 
 const allReducers = {
   auth: authReducer,
+  resume: resumeReducer,
   [baseApi.reducerPath]: baseApi.reducer,
   // [experienceApi.reducerPath]: experienceApi.reducer,
 };
