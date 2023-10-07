@@ -7,12 +7,18 @@
   "description": "",
   "scripts": {
     "dev": "pnpm run --parallel dev",
+    "lint": "pnpm run --parallel lint",
+    "start": "pnpm run --parallel start",
+    "format:server": "pnpm run --filter=server format",
+    "start:server:prod": "pnpm run --filter=server start:prod",
     "doc:server": "pnpm run --filter=server doc",
     "dev:server": "pnpm run --filter=server dev",
     "dev:client": "pnpm run --filter=client dev",
     "build": "pnpm run --parallel build",
     "build:server": "pnpm run --filter=server build",
-    "build:client": "pnpm run --filter=client build"
+    "build:client": "pnpm run --filter=client build",
+    "lint:server": "pnpm run --filter=server lint",
+    "lint:client": "pnpm run --filter=client lint"
   },
   "keywords": [],
   "author": {
