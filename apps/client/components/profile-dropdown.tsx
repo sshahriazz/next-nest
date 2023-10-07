@@ -9,13 +9,19 @@ import {
 import { Avatar } from "@nextui-org/avatar";
 import { useAppDispatch, useAppSelector } from "@client/store/hooks";
 import { signout } from "@client/features/authSlice";
+import { setCookie } from "cookies-next";
+import { useRouter } from "next/navigation";
 
 function ProfileDropdown() {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   function handleSignout() {
     dispatch(signout());
+    setCookie("refreshToken", null);
+    setCookie("accessToken", null);
+    router.push("/auth/signin");
   }
   return (
     <Dropdown>

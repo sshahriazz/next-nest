@@ -8,12 +8,9 @@ import NextLink from "next/link";
 import { Checkbox } from "@nextui-org/checkbox";
 import { string, object } from "yup";
 import toast from "react-hot-toast";
-import { redirect, useRouter } from "next/navigation";
-import { authApi, useSigninMutation } from "@client/services/auth";
-import { dispatch } from "@client/store";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { useAppSelector } from "@client/store/hooks";
-import React, { useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useSigninMutation } from "@client/services/auth";
+import React from "react";
 import { setCookie } from "cookies-next";
 
 const getCharacterValidationError = (str: string) => {
@@ -26,21 +23,16 @@ const SignupSchema = object().shape({
     .min(8, "Password must be at least 8 characters")
     .matches(/[0-9]/, getCharacterValidationError("digit"))
     .matches(/[a-z]/, getCharacterValidationError("lowercase"))
-    .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
+    .matches(/[A-Z]/, getCharacterValidationError("uppercase"))
+    .matches(
+      /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/,
+      getCharacterValidationError("special")
+    ),
 });
 
 function SigninForm() {
   const router = useRouter();
   const [signin, { isLoading }] = useSigninMutation();
-  const { user } = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (user?.email) {
-      console.log("called");
-
-      // router.replace("/");
-    }
-  }, [user]);
 
   return (
     <Formik
@@ -58,7 +50,7 @@ function SigninForm() {
             expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
             secure: true,
           });
-          // router.push("/");
+          router.push("/");
         } else {
           toast.error(
             Array.isArray(result.error.data.message)
