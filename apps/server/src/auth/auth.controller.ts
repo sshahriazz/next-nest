@@ -6,21 +6,18 @@ import {
   Param,
   HttpStatus,
   Req,
-  BadRequestException,
-  HttpException,
   Res,
   Query,
 } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginInput } from './dto/login.input';
-import { RefreshTokenInput } from './dto/refresh-token.input';
 import { SignupInput } from './dto/signup.input';
 import { UserEntity } from './entities/user.entity';
 import { IsPublic } from './public.decorator';
 import { UserRole } from '@server/users/entities/user.entity';
 import { ResponseObject } from '@server/common/configs/config.interface';
-import { LoginResponse, SignupResponse, Token } from './entities/token.entity';
+import { LoginResponse, SignupResponse } from './entities/token.entity';
 import { Request, Response } from 'express';
 import { MailerService } from '@server/mailer/mailer.service';
 

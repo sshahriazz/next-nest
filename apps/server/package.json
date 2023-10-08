@@ -47,6 +47,7 @@
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
+    "shared": "workspace:^",
     "typeorm": "^0.3.17"
   },
   "devDependencies": {

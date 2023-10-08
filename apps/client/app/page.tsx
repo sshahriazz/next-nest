@@ -1,7 +1,4 @@
-import dynamic from "next/dynamic";
 import { subtitle, title } from "@client/components/primitives";
-import { siteConfig } from "@client/config/site";
-import { button as buttonStyles } from "@nextui-org/theme";
 
 import { Snippet } from "@nextui-org/snippet";
 

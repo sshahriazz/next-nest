@@ -25,7 +25,11 @@ const SignupSchema = object().shape({
     .min(8, "Password must be at least 8 characters")
     .matches(/[0-9]/, getCharacterValidationError("digit"))
     .matches(/[a-z]/, getCharacterValidationError("lowercase"))
-    .matches(/[A-Z]/, getCharacterValidationError("uppercase")),
+    .matches(/[A-Z]/, getCharacterValidationError("uppercase"))
+    .matches(
+      /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/,
+      getCharacterValidationError("special")
+    ),
   confirmPassword: string()
     .required("Please re-type your password")
     .oneOf([ref("password")], "Passwords does not match"),
@@ -41,13 +45,6 @@ function SignupForm() {
   const router = useRouter();
 
   const [signup, { isLoading }] = useSignupMutation();
-  const { user } = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (user?.email) {
-      router.replace("/");
-    }
-  }, [user]);
 
   return (
     <Formik
@@ -62,9 +59,16 @@ function SignupForm() {
       onSubmit={async (values, { setSubmitting }) => {
         const result: any = await signup(values);
         if (result.data) {
-          toast.success(result.data.message);
-
-          // router.push("/");
+          toast.success(result.data);
+          setCookie("refreshToken", result.data.data.tokens.refreshToken, {
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            secure: true,
+          });
+          setCookie("accessToken", result.data.data.tokens.accessToken, {
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            secure: true,
+          });
+          router.push("/");
         } else {
           toast.error(result.error.data.message);
         }

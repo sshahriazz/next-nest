@@ -1,29 +1,35 @@
 import { authApi } from "@client/services/auth";
 import type { RootState } from "@client/store";
+import { User } from "@client/types/api/response";
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { setCookie } from "cookies-next";
 
 // Define a type for the slice state
 interface AuthInterface {
-  user: Record<string, any>;
+  user: User;
   accessToken: string;
   refreshToken: string;
 }
 
 // Define the initial state using that type
 const initialState: AuthInterface = {
-  user: {},
+  user: {
+    id: "",
+    firstname: "",
+    role: [],
+    lastname: "",
+    email: "",
+  },
   accessToken: "",
   refreshToken: "",
 };
 
 export const authSlice = createSlice({
   name: "auth",
-  // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<Record<string, any>>) => {
+    setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
     },
     setAccessToken: (state, action: PayloadAction<string>) => {
@@ -35,16 +41,30 @@ export const authSlice = createSlice({
       state.refreshToken = action.payload;
     },
     signout: (state) => {
-      state.user = {};
+      state.user = {
+        id: "",
+        firstname: "",
+        role: [],
+        lastname: "",
+        email: "",
+      };
       state.accessToken = "";
       state.refreshToken = "";
-      // setCookie("accessToken", null);
-      // setCookie("refreshToken", null);
+      setCookie("accessToken", null);
+      setCookie("refreshToken", null);
     },
   },
   extraReducers: (builder) => {
     builder.addMatcher(
       authApi.endpoints.signin.matchFulfilled,
+      (state, { payload }) => {
+        state.user = payload.data.user;
+        state.accessToken = payload.data.tokens.accessToken;
+        state.refreshToken = payload.data.tokens.refreshToken;
+      }
+    );
+    builder.addMatcher(
+      authApi.endpoints.signup.matchFulfilled,
       (state, { payload }) => {
         state.user = payload.data.user;
         state.accessToken = payload.data.tokens.accessToken;

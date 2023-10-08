@@ -8,12 +8,13 @@ import {
 } from "@nextui-org/dropdown";
 import { Avatar } from "@nextui-org/avatar";
 import { useAppDispatch, useAppSelector } from "@client/store/hooks";
-import { signout } from "@client/features/authSlice";
+import { selectAuth, signout } from "@client/features/authSlice";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function ProfileDropdown() {
-  const { user } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -42,7 +43,11 @@ function ProfileDropdown() {
           <p className="font-semibold">Signed in as</p>
           {user.email}
         </DropdownItem>
-        <DropdownItem textValue="My Settings" key="settings">
+        <DropdownItem
+          onClick={() => router.push(`/settings/${user.id}`)}
+          textValue="My Settings"
+          key="settings"
+        >
           My Settings
         </DropdownItem>
         <DropdownItem

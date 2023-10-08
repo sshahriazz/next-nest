@@ -16,12 +16,14 @@ import {
 import storage from "redux-persist/lib/storage/session";
 import { experienceApi } from "@client/services/resume/experience";
 import { baseApi } from "@client/services/api";
+import userReducer from "@client/features/userSlice";
 
 const persistConfig = { key: "root", storage };
 
 const allReducers = {
   auth: authReducer,
   resume: resumeReducer,
+  user: userReducer,
   [baseApi.reducerPath]: baseApi.reducer,
   // [experienceApi.reducerPath]: experienceApi.reducer,
 };

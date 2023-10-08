@@ -8,8 +8,20 @@ export default async function middleware(req: NextRequest) {
     ?.split("=")[1];
 
   if (!token || token === "null") {
-    if (req.nextUrl.pathname !== "/auth/signin") {
-      return NextResponse.redirect(new URL("/auth/signin", req.url));
+    if (
+      req.nextUrl.pathname !== "/auth/signin" &&
+      req.nextUrl.pathname !== "/auth/signup"
+    ) {
+      if (
+        req.nextUrl.pathname.split("/")[1] === "signin" ||
+        req.nextUrl.pathname.split("/")[1] === "signup"
+      ) {
+        return NextResponse.redirect(
+          new URL(`/auth/${req.nextUrl.pathname.split("/")[1]}`, req.url)
+        );
+      } else {
+        return NextResponse.redirect(new URL(`/auth/signin`, req.url));
+      }
     }
   } else {
     if (
@@ -17,11 +29,12 @@ export default async function middleware(req: NextRequest) {
       req.nextUrl.pathname === "/auth/signup"
     ) {
       return NextResponse.redirect(new URL("/", req.url));
+    } else {
+      return NextResponse.next();
     }
   }
-
-  return NextResponse.next();
 }
+
 export const config = {
   matcher: [
     /*

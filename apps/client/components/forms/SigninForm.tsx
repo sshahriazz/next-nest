@@ -50,7 +50,7 @@ function SigninForm() {
             expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
             secure: true,
           });
-          router.push("/");
+          router.replace("/");
         } else {
           toast.error(
             Array.isArray(result.error.data.message)
