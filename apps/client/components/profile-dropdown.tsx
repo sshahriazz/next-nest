@@ -5,24 +5,31 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  useDropdown,
 } from "@nextui-org/dropdown";
 import { Avatar } from "@nextui-org/avatar";
-import { useAppDispatch, useAppSelector } from "@client/store/hooks";
-import { selectAuth, signout } from "@client/features/authSlice";
-import { setCookie } from "cookies-next";
+import { setCookie, deleteCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import storage from "react-secure-storage";
+import { useSWRConfig } from "swr";
+import { authPath as cacheKey } from "@client/services/auth-api";
+import useUser from "@client/hooks/useUser";
 
 function ProfileDropdown() {
-  const { user } = useAppSelector(selectAuth);
-  const dispatch = useAppDispatch();
   const router = useRouter();
+  const { cache } = useSWRConfig();
+  const { data: user, mutate } = useUser();
 
   function handleSignout() {
-    dispatch(signout());
-    setCookie("refreshToken", null);
-    setCookie("accessToken", null);
-    router.push("/auth/signin");
+    deleteCookie("refreshToken");
+    deleteCookie("accessToken");
+    storage.clear();
+    window.dispatchEvent(new Event("storage"));
+    cache.delete(cacheKey);
+    mutate(cacheKey);
+
+    router.replace("/auth/signin");
   }
   return (
     <Dropdown>
@@ -41,10 +48,10 @@ function ProfileDropdown() {
           className="h-14 gap-2"
         >
           <p className="font-semibold">Signed in as</p>
-          {user.email}
+          {user && user.email}
         </DropdownItem>
         <DropdownItem
-          onClick={() => router.push(`/settings/${user.id}`)}
+          onClick={() => router.push(`/settings/id`)}
           textValue="My Settings"
           key="settings"
         >

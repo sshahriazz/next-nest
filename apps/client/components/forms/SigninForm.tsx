@@ -7,11 +7,11 @@ import { Link } from "@nextui-org/link";
 import NextLink from "next/link";
 import { Checkbox } from "@nextui-org/checkbox";
 import { string, object } from "yup";
-import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { useSigninMutation } from "@client/services/auth";
 import React from "react";
 import { setCookie } from "cookies-next";
+import useSWR, { useSWRConfig } from "swr";
+import useSWRMutation from "swr/mutation";
 
 const getCharacterValidationError = (str: string) => {
   return `Your password must have at least one ${str} character`;
@@ -29,35 +29,35 @@ const SignupSchema = object().shape({
       getCharacterValidationError("special")
     ),
 });
-
+import { authPath as cacheKey, signin } from "@client/services/auth-api";
+import toast from "react-hot-toast";
+import storage from "react-secure-storage";
 function SigninForm() {
   const router = useRouter();
-  const [signin, { isLoading }] = useSigninMutation();
+  const { cache, mutate } = useSWRConfig();
+  const { trigger, error } = useSWRMutation("/auth/signin", signin);
 
   return (
     <Formik
       initialValues={{ email: "", password: "" }}
       validationSchema={SignupSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        const result: any = await signin(values);
+        const result = await trigger({ ...values });
         if (result.data) {
-          toast.success(result.data.message);
-          setCookie("refreshToken", result.data.data.tokens.refreshToken, {
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          storage.setItem("accessToken", result.data.tokens.accessToken);
+          setCookie("refreshToken", result.data.tokens.refreshToken, {
             secure: true,
-          });
-          setCookie("accessToken", result.data.data.tokens.accessToken, {
             expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-            secure: true,
           });
+          setCookie("accessToken", result.data.tokens.accessToken, {
+            secure: true,
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+          });
+          window.dispatchEvent(new Event("storage"));
+          mutate(cacheKey);
           router.replace("/");
-        } else {
-          toast.error(
-            Array.isArray(result.error.data.message)
-              ? result.error.data.message[0].constraints
-              : result.error.data.message
-          );
         }
+
         setSubmitting(false);
       }}
     >
@@ -74,6 +74,7 @@ function SigninForm() {
           <Input
             type="email"
             name="email"
+            autoComplete="email"
             label="Email"
             onChange={handleChange}
             onBlur={handleBlur}
@@ -83,6 +84,7 @@ function SigninForm() {
           <PasswordInput
             name="password"
             label="Password"
+            autoComplete="current-password"
             onChange={handleChange}
             onBlur={handleBlur}
             value={values.password}
@@ -98,7 +100,7 @@ function SigninForm() {
             </Link>
           </div>
           <Button
-            isLoading={isSubmitting || isLoading}
+            isLoading={isSubmitting}
             type="submit"
             variant="flat"
             color="primary"

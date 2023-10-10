@@ -4,31 +4,47 @@ import { NextUIProvider } from "@nextui-org/system";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeProviderProps } from "next-themes/dist/types";
 import { Toaster } from "react-hot-toast";
-import ReduxProvider from "@client/store/ReduxProvider";
-import { PersistGate } from "redux-persist/integration/react";
-import { persister } from "@client/store";
+import { SWRConfig } from "swr";
+import { baseApi } from "@client/services/axios-instance";
 
 export interface ProvidersProps {
   children: React.ReactNode;
   themeProps?: ThemeProviderProps;
 }
 
+const fetcher = async (url: string) => {
+  const response = await baseApi.get(url);
+  return response.data;
+};
+// function localStorageProvider() {
+//   // When initializing, we restore the data from `localStorage` into a map.
+//   const map = new Map(JSON.parse(localStorage.getItem("app-cache") || "[]"));
+
+//   // Before unloading the app, we write back all the data into `localStorage`.
+//   window.addEventListener("beforeunload", () => {
+//     const appCache = JSON.stringify(Array.from(map.entries()));
+//     localStorage.setItem("app-cache", appCache);
+//   });
+
+//   // We still use the map for write & read for performance.
+//   return map;
+// }
+
 export function Providers({ children, themeProps }: ProvidersProps) {
   return (
-    <ReduxProvider>
-      <PersistGate
-        loading={
-          <div className="flex justify-center items-center h-screen bg-gray-900">
-            <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-blue-500"></div>
-          </div>
-        }
-        persistor={persister}
+    <div>
+      <SWRConfig
+        value={{
+          refreshInterval: 3000,
+          dedupingInterval: 3000,
+          fetcher: fetcher,
+        }}
       >
         <NextUIProvider>
           <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
         </NextUIProvider>
         <Toaster />
-      </PersistGate>
-    </ReduxProvider>
+      </SWRConfig>
+    </div>
   );
 }

@@ -11,8 +11,6 @@ import { string, ref, object } from "yup";
 import { toast } from "react-hot-toast";
 
 import { useRouter } from "next/navigation";
-import { useSignupMutation } from "@client/services/auth";
-import { useAppSelector } from "@client/store/hooks";
 import { setCookie } from "cookies-next";
 
 const getCharacterValidationError = (str: string) => {
@@ -44,8 +42,6 @@ const SignupSchema = object().shape({
 function SignupForm() {
   const router = useRouter();
 
-  const [signup, { isLoading }] = useSignupMutation();
-
   return (
     <Formik
       initialValues={{
@@ -57,21 +53,20 @@ function SignupForm() {
       }}
       validationSchema={SignupSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        const result: any = await signup(values);
-        if (result.data) {
-          toast.success(result.data);
-          setCookie("refreshToken", result.data.data.tokens.refreshToken, {
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-            secure: true,
-          });
-          setCookie("accessToken", result.data.data.tokens.accessToken, {
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-            secure: true,
-          });
-          router.push("/");
-        } else {
-          toast.error(result.error.data.message);
-        }
+        // if (result.data) {
+        //   toast.success(result.data);
+        //   setCookie("refreshToken", result.data.data.tokens.refreshToken, {
+        //     expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        //     secure: true,
+        //   });
+        //   setCookie("accessToken", result.data.data.tokens.accessToken, {
+        //     expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        //     secure: true,
+        //   });
+        //   router.push("/");
+        // } else {
+        //   toast.error(result.error.data.message);
+        // }
         setSubmitting(false);
       }}
     >
@@ -149,7 +144,7 @@ function SignupForm() {
             <Checkbox>I Accept Terms & Conditions</Checkbox>
           </div>
           <Button
-            isLoading={isSubmitting || isLoading}
+            isLoading={isSubmitting}
             type="submit"
             variant="flat"
             color="primary"
