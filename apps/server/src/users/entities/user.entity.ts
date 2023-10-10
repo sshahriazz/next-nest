@@ -1,4 +1,3 @@
-import { Resume } from '@server/resume/entity/resume.entity';
 import {
   Entity,
   Column,
@@ -52,9 +51,6 @@ export class User {
 
   @Column({ type: 'boolean', default: false })
   disableAccess: boolean;
-
-  @OneToOne(() => Resume, (resume) => resume.id, { cascade: true })
-  resume: Resume;
 
   @CreateDateColumn()
   createdAt: Date;

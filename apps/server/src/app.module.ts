@@ -11,7 +11,6 @@ import { DbConfig } from './common/configs/config.interface';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { RoleGuard } from './auth/role/role.guard';
 import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter';
-import { ResumeModule } from './resume/resume.module';
 import { MailerModule as MailingModule } from './mailer/mailer.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -47,7 +46,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     ]),
     UsersModule,
     AuthModule,
-    ResumeModule,
     MailingModule,
     MailerModule.forRoot({
       transport: 'smtps://user@domain.com:pass@smtp.domain.com',
