@@ -120,7 +120,7 @@ export class AuthController {
   }
 
   @Get('user/:access_token')
-  @IsPublic()
+  // @IsPublic()
   async user(@Param('access_token') accessToken: string): Promise<UserEntity> {
     return await this.authService.getUserFromToken(accessToken);
   }

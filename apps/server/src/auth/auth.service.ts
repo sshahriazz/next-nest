@@ -108,7 +108,7 @@ export class AuthService {
   }
 
   async getUserFromToken(token: string): Promise<UserEntity> {
-    const id = this.jwtService.decode(token)['userId'];
+    const id = await this.jwtService.decode(token)['sub'];
     const user = await this.userRepository.findOne({ where: { id } });
 
     return user;

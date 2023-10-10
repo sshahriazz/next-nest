@@ -24,11 +24,16 @@ import { GithubIcon } from "@client/components/icons";
 
 import { Logo } from "@client/components/icons";
 import ProfileDropdown from "./profile-dropdown";
-import { useAppSelector } from "@client/store/hooks";
 import { Flex } from "./flex";
+import storage from "react-secure-storage";
+import useSWR from "swr";
+import { authPath, getUser } from "@client/services/auth-api";
+import { useEffect, useState } from "react";
+import useUser from "@client/hooks/useUser";
 
 export const Navbar = () => {
-  const { user } = useAppSelector((state) => state.auth);
+  const { data: user } = useUser();
+
   return (
     <NextUINavbar isBlurred isBordered maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -65,7 +70,7 @@ export const Navbar = () => {
         </NavbarItem>
 
         <NavbarItem>
-          {user.email ? (
+          {user && user.email ? (
             <ProfileDropdown />
           ) : (
             <Flex gap="3">
