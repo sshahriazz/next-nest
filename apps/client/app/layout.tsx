@@ -1,4 +1,3 @@
-"use client";
 import "@client/styles/globals.css";
 import { Metadata } from "next";
 import { siteConfig } from "@client/config/site";
@@ -8,24 +7,23 @@ import { Navbar } from "@client/components/navbar";
 import { Link as NextLink } from "@nextui-org/link";
 import clsx from "clsx";
 import Link from "next/link";
-import GlobalMessage from "@client/components/global-message";
 
-// export const metadata: Metadata = {
-//   title: {
-//     default: siteConfig.name,
-//     template: `%s - ${siteConfig.name}`,
-//   },
-//   description: siteConfig.description,
-//   themeColor: [
-//     { media: "(prefers-color-scheme: light)", color: "white" },
-//     { media: "(prefers-color-scheme: dark)", color: "black" },
-//   ],
-//   icons: {
-//     icon: "/favicon.ico",
-//     shortcut: "/favicon-16x16.png",
-//     apple: "/apple-touch-icon.png",
-//   },
-// };
+export const metadata: Metadata = {
+  title: {
+    default: siteConfig.name,
+    template: `%s - ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+};
 
 export default function RootLayout({
   children,
@@ -43,7 +41,7 @@ export default function RootLayout({
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex flex-col h-screen">
-            <GlobalMessage />
+            {/* <GlobalMessage /> */}
             <Navbar />
             <main className="container mx-auto max-w-7xl pt-8 px-6 flex-grow">
               {children}
