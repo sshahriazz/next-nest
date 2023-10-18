@@ -114,6 +114,9 @@ export class AuthController {
   @IsPublic()
   async refreshToken(@Req() req: Request) {
     const refreshTokenString = req.headers['cookie'];
+    if (!refreshTokenString) {
+      throw new Error('No refresh token found');
+    }
     const token = refreshTokenString.split('=')[1].split(';')[0];
 
     return this.authService.refreshToken(token);

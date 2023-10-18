@@ -1,4 +1,4 @@
-import { Entity, OneToMany, OneToOne } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { PersonalInfo } from './personal-info.entity';
 import { ProfessionalSummary } from './pro-summary.entity';
 import { ExperienceCategory } from './experience-category.entity';
@@ -9,21 +9,24 @@ import { Certificate } from './certificate.entity';
 import { Interest } from './interest.entity';
 import { Additional } from './additional.entity';
 import { SkillCategory } from './skill-category.entity';
+import { User } from '@server/users/entities/user.entity';
 
 @Entity('resume')
 export class Resume extends CommonEntity {
-  @OneToOne(() => PersonalInfo, (personalInfo) => personalInfo.id, {
+  @OneToOne(() => PersonalInfo, (personalInfo) => personalInfo.resume, {
     cascade: true,
   })
+  @JoinColumn()
   personalInfo: PersonalInfo;
 
   @OneToOne(
     () => ProfessionalSummary,
-    (professionalSummary) => professionalSummary.id,
+    (professionalSummary) => professionalSummary.resume,
     {
       cascade: true,
     },
   )
+  @JoinColumn()
   professionalSummary: ProfessionalSummary;
 
   @OneToMany(
@@ -65,4 +68,10 @@ export class Resume extends CommonEntity {
     cascade: true,
   })
   additionalInfos: Additional[];
+
+  @ManyToOne(() => User, (user) => user.resume, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  author: User;
 }

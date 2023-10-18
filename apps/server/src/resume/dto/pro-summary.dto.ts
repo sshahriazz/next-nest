@@ -5,12 +5,9 @@ export enum SummaryType {
   BULLET = 'BULLET',
 }
 
-export class ProfessionalSummaryDto {
-  @ApiProperty({ type: String })
-  id: string;
-
+export class CreateProfessionalSummaryDto {
   @ApiProperty({ enum: SummaryType, default: SummaryType.PARAGRAPH })
-  type: SummaryType;
+  summaryType: string;
 
   @ApiProperty({ type: String })
   summary: string;

@@ -6,6 +6,7 @@ import {
   OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 export enum UserRole {
@@ -53,8 +54,11 @@ export class User {
   @Column({ type: 'boolean', default: false })
   disableAccess: boolean;
 
-  @OneToOne(() => Resume, (resume) => resume.id, { cascade: true })
-  resume: Resume;
+  @OneToMany(() => Resume, (resume) => resume.author, {
+    cascade: true,
+    eager: true,
+  })
+  resume: Resume[];
 
   @CreateDateColumn()
   createdAt: Date;

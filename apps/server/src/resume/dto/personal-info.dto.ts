@@ -14,7 +14,7 @@ export class AdditionalFieldDto {
   value: string;
 }
 
-export class PersonalInfoDto {
+export class CreatePersonalInfoDto {
   @ApiProperty({ type: String })
   firstname: string;
   @ApiProperty({ type: String })

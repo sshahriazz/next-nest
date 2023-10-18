@@ -5,8 +5,6 @@ import Link from "next/link";
 import { Link as NextLink } from "@nextui-org/link";
 import React from "react";
 import SigninForm from "@client/components/forms/SigninForm";
-import { redirect } from "next/navigation";
-import { useAppSelector } from "@client/store/hooks";
 
 function SignIn() {
   return (

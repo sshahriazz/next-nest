@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { Skill } from './skill.entity';
 import CommonEntity from '@server/common/configs/common-entity';
 import { Resume } from './resume.entity';
@@ -12,7 +12,6 @@ export class SkillCategory extends CommonEntity {
     onDelete: 'CASCADE',
     cascade: true,
   })
-  @JoinTable()
   skills: Skill[];
 
   @ManyToOne(() => Resume, (resume) => resume.skillCategories)

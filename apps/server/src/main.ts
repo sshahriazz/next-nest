@@ -30,20 +30,20 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: false,
-      exceptionFactory: (errors) => {
-        return new HttpException(
-          {
-            statusCode: 400,
-            message: errors.map((error) => {
-              return {
-                property: error.property,
-                constraints: Object.values(error.constraints).join(', '),
-              };
-            }),
-          },
-          400,
-        );
-      },
+      // exceptionFactory: (errors) => {
+      //   return new HttpException(
+      //     {
+      //       statusCode: 400,
+      //       message: errors.map((error) => {
+      //         return {
+      //           property: error.property,
+      //           constraints: Object.values(error.constraints).join(', '),
+      //         };
+      //       }),
+      //     },
+      //     400,
+      //   );
+      // },
     }),
   );
 

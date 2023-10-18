@@ -8,21 +8,24 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  Delete,
 } from '@nestjs/common';
 import { ResumeService } from './resume.service';
-import { ResumeDto } from './dto/resume.dto';
-import { PersonalInfoDto } from './dto/personal-info.dto';
-import { ProfessionalSummaryDto } from './dto/pro-summary.dto';
-import { ExperienceCategoryDto } from './dto/experience-category.dto';
-import { ExperienceDto } from './dto/experience.dto';
-import { SkillCategoryDto } from './dto/skill-category.dto';
-import { SkillDto } from './dto/skill.dto';
-import { CertificateDto } from './dto/certificate.dto';
-import { CourseDto } from './dto/course.dto';
-import { InterestDto } from './dto/interest.dto';
-import { AdditionalDto } from './dto/additional.dto';
-import { EducationDto } from './dto/education.dto';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { CreateResumeDto } from './dto/resume.dto';
+import { CreatePersonalInfoDto } from './dto/personal-info.dto';
+import { CreateProfessionalSummaryDto } from './dto/pro-summary.dto';
+import { CreateExperienceCategoryDto } from './dto/experience-category.dto';
+import { CreateExperienceDto } from './dto/experience.dto';
+import { CreateSkillCategoryDto } from './dto/skill-category.dto';
+import { CreateCreateSkillDto } from './dto/skill.dto';
+import { CreateCertificateDto } from './dto/certificate.dto';
+import { CreateCourseDto } from './dto/course.dto';
+import { CreateInterestDto } from './dto/interest.dto';
+import { CreateAdditionalDto } from './dto/additional.dto';
+import { CreateEducationDto } from './dto/education.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Paginate, PaginateQuery, PaginatedSwaggerDocs } from 'nestjs-paginate';
+import { Resume } from './entity/resume.entity';
 
 @ApiTags('resume')
 @ApiBearerAuth()
@@ -31,46 +34,51 @@ export class ResumeController {
   constructor(private readonly resumeService: ResumeService) {}
 
   @Post()
-  async createResume(@Body() resume: ResumeDto) {
-    return await this.resumeService.createResume(resume);
-  }
-
-  @Get(':id')
-  async getResume(@Param('id') id: string) {
-    return await this.resumeService.getResume(id);
-  }
-
-  @Get()
-  @ApiQuery({ name: 'page', type: Number, required: false })
-  @ApiQuery({ name: 'limit', type: Number, required: false })
-  async allResume(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllResumes({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume',
+  async createResume(@Body() resume: CreateResumeDto) {
+    return await this.resumeService.createResume({
+      authorId: resume.authorId,
     });
   }
 
-  @Put(':id')
-  async updateResume(@Param('id') id: string, @Body() resume: ResumeDto) {
-    return await this.resumeService.updateResume(id, resume);
+  @Get(':id')
+  async singleResume(@Param('id') id: string) {
+    return await this.resumeService.getResume(id);
+  }
+
+  @Get('/user/:userId')
+  async listUserResume(@Param('userId') userId: string) {
+    return await this.resumeService.listUserResume(userId);
+  }
+
+  @Get()
+  @PaginatedSwaggerDocs(Resume, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async allResume(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.findAllResumes(query);
+  }
+
+  @Post('personal-info/add/:resumeId')
+  async createPersonalInfo(
+    @Param('resumeId') resumeId: string,
+    @Body() personalInfo: CreatePersonalInfoDto,
+  ) {
+    return await this.resumeService.createPersonalInfo(resumeId, personalInfo);
   }
 
   @Put('personal-info/:id')
   async updatePersonalInfo(
     @Param('id') id: string,
-    @Body() personalInfo: PersonalInfoDto,
+    @Body() personalInfo: CreatePersonalInfoDto,
   ) {
     return await this.resumeService.updatePersonalInfo(id, personalInfo);
   }
 
   @Get('personal-info/:id')
   async getPersonalInfo(@Param('id') id: string) {
-    return await this.resumeService.getPersonalInfo(id);
+    return await this.resumeService.singlePersonalInfo(id);
   }
 
   @Get('personal-info')
@@ -79,24 +87,32 @@ export class ResumeController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllPersonalInfo({
+    return await this.resumeService.listPersonalInfo({
       page,
       limit,
       route: 'http://loclahost:4000/resume/personal-info',
     });
   }
 
+  @Post('summary/:resumeId')
+  async createSummary(
+    @Param('resumeId') resumeId: string,
+    @Body() summary: CreateProfessionalSummaryDto,
+  ) {
+    return await this.resumeService.createSummary(resumeId, summary);
+  }
+
   @Put('summary/:id')
   async updateSummary(
     @Param('id') id: string,
-    @Body() summary: ProfessionalSummaryDto,
+    @Body() summary: CreateProfessionalSummaryDto,
   ) {
     return await this.resumeService.updateSummary(id, summary);
   }
 
   @Get('summary/:id')
   async getSummary(@Param('id') id: string) {
-    return await this.resumeService.getSummary(id);
+    return await this.resumeService.singleSummary(id);
   }
 
   @Get('summary')
@@ -105,7 +121,7 @@ export class ResumeController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
   ) {
     limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllSummaries({
+    return await this.resumeService.listSummary({
       page,
       limit,
       route: 'http://loclahost:4000/resume/summary',
@@ -115,7 +131,7 @@ export class ResumeController {
   @Post('experience-category/:id')
   async createExperienceCategory(
     @Param('id') id: string,
-    @Body() experienceCategory: ExperienceCategoryDto,
+    @Body() experienceCategory: CreateExperienceCategoryDto,
   ) {
     return await this.resumeService.createExperienceCategory(
       id,
@@ -126,7 +142,7 @@ export class ResumeController {
   @Put('experience-category/:id')
   async updateExperienceCategory(
     @Param('id') id: string,
-    @Body() experienceCategory: ExperienceCategoryDto,
+    @Body() experienceCategory: CreateExperienceCategoryDto,
   ) {
     return await this.resumeService.updateExperienceCategory(
       id,
@@ -155,7 +171,7 @@ export class ResumeController {
   @Post('experience/:id')
   async createExperience(
     @Param('id') id: string,
-    @Body() experience: ExperienceDto,
+    @Body() experience: CreateExperienceDto,
   ) {
     return await this.resumeService.createExperience(id, experience);
   }
@@ -163,7 +179,7 @@ export class ResumeController {
   @Put('experience/:id')
   async updateExperience(
     @Param('id') id: string,
-    @Body() experience: ExperienceDto,
+    @Body() experience: CreateExperienceDto,
   ) {
     return await this.resumeService.updateExperience(id, experience);
   }
@@ -189,7 +205,7 @@ export class ResumeController {
   @Post('skill-category/:id')
   async createSkillCategory(
     @Param('id') id: string,
-    @Body() skillCategory: SkillCategoryDto,
+    @Body() skillCategory: CreateSkillCategoryDto,
   ) {
     return await this.resumeService.createSkillCategory(id, skillCategory);
   }
@@ -197,7 +213,7 @@ export class ResumeController {
   @Put('skill-category/:id')
   async updateSkillCategory(
     @Param('id') id: string,
-    @Body() skillCategory: SkillCategoryDto,
+    @Body() skillCategory: CreateSkillCategoryDto,
   ) {
     return await this.resumeService.updateSkillCategory(id, skillCategory);
   }
@@ -221,12 +237,18 @@ export class ResumeController {
   }
 
   @Post('skill/:id')
-  async createSkill(@Param('id') id: string, @Body() skill: SkillDto) {
+  async createSkill(
+    @Param('id') id: string,
+    @Body() skill: CreateCreateSkillDto,
+  ) {
     return await this.resumeService.createSkill(id, skill);
   }
 
   @Put('skill/:id')
-  async updateSkill(@Param('id') id: string, @Body() skill: SkillDto) {
+  async updateSkill(
+    @Param('id') id: string,
+    @Body() skill: CreateCreateSkillDto,
+  ) {
     return await this.resumeService.updateSkill(id, skill);
   }
 
@@ -251,7 +273,7 @@ export class ResumeController {
   @Post('certificate/:id')
   async createCertificate(
     @Param('id') id: string,
-    @Body() certificate: CertificateDto,
+    @Body() certificate: CreateCertificateDto,
   ) {
     return await this.resumeService.createCertificate(id, certificate);
   }
@@ -259,7 +281,7 @@ export class ResumeController {
   @Put('certificate/:id')
   async updateCertificate(
     @Param('id') id: string,
-    @Body() certificate: CertificateDto,
+    @Body() certificate: CreateCertificateDto,
   ) {
     return await this.resumeService.updateCertificate(id, certificate);
   }
@@ -283,12 +305,12 @@ export class ResumeController {
   }
 
   @Post('course/:id')
-  async createCourse(@Param('id') id: string, @Body() course: CourseDto) {
+  async createCourse(@Param('id') id: string, @Body() course: CreateCourseDto) {
     return await this.resumeService.createCourse(id, course);
   }
 
   @Put('course/:id')
-  async updateCourse(@Param('id') id: string, @Body() course: CourseDto) {
+  async updateCourse(@Param('id') id: string, @Body() course: CreateCourseDto) {
     return await this.resumeService.updateCourse(id, course);
   }
 
@@ -311,12 +333,18 @@ export class ResumeController {
   }
 
   @Post('interest/:id')
-  async createInterest(@Param('id') id: string, @Body() interest: InterestDto) {
+  async createInterest(
+    @Param('id') id: string,
+    @Body() interest: CreateInterestDto,
+  ) {
     return await this.resumeService.createInterest(id, interest);
   }
 
   @Put('interest/:id')
-  async updateInterest(@Param('id') id: string, @Body() interest: InterestDto) {
+  async updateInterest(
+    @Param('id') id: string,
+    @Body() interest: CreateInterestDto,
+  ) {
     return await this.resumeService.updateInterest(id, interest);
   }
 
@@ -341,7 +369,7 @@ export class ResumeController {
   @Post('additional/:id')
   async createAdditional(
     @Param('id') id: string,
-    @Body() additional: AdditionalDto,
+    @Body() additional: CreateAdditionalDto,
   ) {
     return await this.resumeService.createAdditional(id, additional);
   }
@@ -349,7 +377,7 @@ export class ResumeController {
   @Put('additional/:id')
   async updateAdditional(
     @Param('id') id: string,
-    @Body() additional: AdditionalDto,
+    @Body() additional: CreateAdditionalDto,
   ) {
     return await this.resumeService.updateAdditional(id, additional);
   }
@@ -375,7 +403,7 @@ export class ResumeController {
   @Post('education/:id')
   async createEducation(
     @Param('id') id: string,
-    @Body() education: EducationDto,
+    @Body() education: CreateEducationDto,
   ) {
     return await this.resumeService.createEducation(id, education);
   }
@@ -383,7 +411,7 @@ export class ResumeController {
   @Put('education/:id')
   async updateEducation(
     @Param('id') id: string,
-    @Body() education: EducationDto,
+    @Body() education: CreateEducationDto,
   ) {
     return await this.resumeService.updateEducation(id, education);
   }
@@ -404,5 +432,53 @@ export class ResumeController {
       limit,
       route: 'http://loclahost:4000/resume/education',
     });
+  }
+  @Delete('resume:id')
+  async deleteResume(@Param('id') id: string) {
+    return await this.resumeService.deleteResume(id);
+  }
+  @Delete('personal-info:id')
+  async deletePersonalInfo(@Param('id') id: string) {
+    return await this.resumeService.deletePersonalInfo(id);
+  }
+  @Delete('summary:id')
+  async deleteSummary(@Param('id') id: string) {
+    return await this.resumeService.deleteSummary(id);
+  }
+  @Delete('experience-category:id')
+  async deleteExperienceCategory(@Param('id') id: string) {
+    return await this.resumeService.deleteExperienceCategory(id);
+  }
+  @Delete('experience:id')
+  async deleteExperience(@Param('id') id: string) {
+    return await this.resumeService.deleteExperience(id);
+  }
+  @Delete('skill-category:id')
+  async deleteSkillCategory(@Param('id') id: string) {
+    return await this.resumeService.deleteSkillCategory(id);
+  }
+  @Delete('skill:id')
+  async deleteSkill(@Param('id') id: string) {
+    return await this.resumeService.deleteSkill(id);
+  }
+  @Delete('certificate:id')
+  async deleteCertificate(@Param('id') id: string) {
+    return await this.resumeService.deleteCertificate(id);
+  }
+  @Delete('course:id')
+  async deleteCourse(@Param('id') id: string) {
+    return await this.resumeService.deleteCourse(id);
+  }
+  @Delete('interest:id')
+  async deleteInterest(@Param('id') id: string) {
+    return await this.resumeService.deleteInterest(id);
+  }
+  @Delete('additional:id')
+  async deleteAdditional(@Param('id') id: string) {
+    return await this.resumeService.deleteAdditional(id);
+  }
+  @Delete('education:id')
+  async deleteEducation(@Param('id') id: string) {
+    return await this.resumeService.deleteEducation(id);
   }
 }

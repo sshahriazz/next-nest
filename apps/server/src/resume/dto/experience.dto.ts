@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ExperienceCategoryDto } from './experience-category.dto';
 
-export class ExperienceDto {
+export class CreateExperienceDto {
   @ApiProperty({ type: String })
   id: string;
   @ApiProperty({ type: String })
@@ -12,7 +11,4 @@ export class ExperienceDto {
   location: string;
   @ApiProperty({ type: String, isArray: true })
   responsibilities: string[];
-
-  @ApiProperty({ type: () => ExperienceCategoryDto })
-  category: ExperienceCategoryDto;
 }

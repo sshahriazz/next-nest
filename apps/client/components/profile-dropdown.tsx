@@ -15,11 +15,13 @@ import storage from "react-secure-storage";
 import { useSWRConfig } from "swr";
 import { authPath as cacheKey } from "@client/services/auth-api";
 import useUser from "@client/hooks/useUser";
+import clsx from "clsx";
 
 function ProfileDropdown() {
   const router = useRouter();
   const { cache } = useSWRConfig();
   const { data: user, mutate } = useUser();
+  console.log(user);
 
   function handleSignout() {
     deleteCookie("refreshToken");
@@ -41,15 +43,24 @@ function ProfileDropdown() {
           src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
         />
       </DropdownTrigger>
-      <DropdownMenu aria-label="Profile Actions" variant="flat">
+      <DropdownMenu aria-label="Profile Actions" variant="light">
         <DropdownItem
           textValue="User info"
           key="profile"
           className="h-14 gap-2"
         >
-          <p className="font-semibold">Signed in as</p>
+          <p className="font-semibold ">Signed in as</p>
           {user && user.email}
         </DropdownItem>
+        {/* {user && user.role === "ADMIN" ? ( */}
+        <DropdownItem
+          onClick={() => router.push(`/users`)}
+          textValue="All Users"
+          key="users"
+        >
+          All Users
+        </DropdownItem>
+
         <DropdownItem
           onClick={() => router.push(`/settings/id`)}
           textValue="My Settings"

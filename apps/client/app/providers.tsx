@@ -12,10 +12,6 @@ export interface ProvidersProps {
   themeProps?: ThemeProviderProps;
 }
 
-const fetcher = async (url: string) => {
-  const response = await baseApi.get(url);
-  return response.data;
-};
 // function localStorageProvider() {
 //   // When initializing, we restore the data from `localStorage` into a map.
 //   const map = new Map(JSON.parse(localStorage.getItem("app-cache") || "[]"));
@@ -37,7 +33,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
         value={{
           refreshInterval: 3000,
           dedupingInterval: 3000,
-          fetcher: fetcher,
+          fetcher: async (url) => await baseApi.get(url).then((res) => res.data),
         }}
       >
         <NextUIProvider>

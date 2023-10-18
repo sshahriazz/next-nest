@@ -1,10 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ResumeDto } from './resume.dto';
 
-export class CertificateDto {
+export class CreateCertificateDto {
   @ApiProperty({ type: String })
   id: string;
-
-  @ApiProperty({ type: () => ResumeDto })
-  resume: ResumeDto;
 }

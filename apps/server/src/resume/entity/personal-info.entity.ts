@@ -1,5 +1,6 @@
 import CommonEntity from '@server/common/configs/common-entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
+import { Resume } from './resume.entity';
 
 export interface OtherSocialLink {
   name: string;
@@ -37,8 +38,32 @@ export class PersonalInfo extends CommonEntity {
   country: string;
   @Column({ type: 'varchar', nullable: true })
   linkedin: string;
-  @Column({ type: 'json', array: true, nullable: true })
-  otherSocialLink: OtherSocialLink[];
-  @Column({ type: 'json', array: true, nullable: true })
-  additionalFields: AdditionalField[];
+  @Column({
+    type: 'json',
+    nullable: true,
+    transformer: {
+      to(value: OtherSocialLink[]): string {
+        return JSON.stringify(value);
+      },
+      from(value: string): OtherSocialLink[] {
+        return JSON.parse(value);
+      },
+    },
+  })
+  otherSocialLink?: OtherSocialLink[];
+  @Column({
+    type: 'json',
+    transformer: {
+      to(value: AdditionalField[]): string {
+        return JSON.stringify(value);
+      },
+      from(value: string): AdditionalField[] {
+        return JSON.parse(value);
+      },
+    },
+    nullable: true,
+  })
+  additionalFields?: AdditionalField[];
+  @OneToOne(() => Resume, (resume) => resume.personalInfo)
+  resume: Resume;
 }

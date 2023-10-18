@@ -1,5 +1,6 @@
 import CommonEntity from '@server/common/configs/common-entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
+import { Resume } from './resume.entity';
 
 export enum SummaryType {
   PARAGRAPH = 'PARAGRAPH',
@@ -8,17 +9,12 @@ export enum SummaryType {
 
 @Entity('pro_summary')
 export class ProfessionalSummary extends CommonEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @Column({ type: 'varchar', default: SummaryType.PARAGRAPH })
+  summaryType: string;
 
-  @Column({
-    type: 'enum',
-    enum: SummaryType,
-    nullable: true,
-    default: SummaryType.PARAGRAPH,
-  })
-  type: SummaryType;
-
-  @Column({ type: 'varchar', nullable: true, default: '' })
+  @Column({ type: 'varchar', nullable: false, default: '' })
   summary: string;
+
+  @OneToOne(() => Resume, (resume) => resume.professionalSummary)
+  resume: Resume;
 }
