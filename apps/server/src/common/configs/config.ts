@@ -7,6 +7,7 @@ const config: Config = {
   },
   cors: {
     enabled: true,
+    origins: ['http://localhost:3000'],
   },
   mail: {
     clientId:

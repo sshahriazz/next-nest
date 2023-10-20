@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -8,8 +7,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { DbConfig } from './common/configs/config.interface';
-import { JwtAuthGuard } from './auth/jwt.guard';
-import { RoleGuard } from './auth/role/role.guard';
 import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter';
 import { ResumeModule } from './resume/resume.module';
 import { MailerModule as MailingModule } from './mailer/mailer.module';
@@ -60,7 +57,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       },
     }),
   ],
-  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,

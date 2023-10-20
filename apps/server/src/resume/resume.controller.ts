@@ -5,9 +5,6 @@ import {
   Put,
   Param,
   Body,
-  Query,
-  DefaultValuePipe,
-  ParseIntPipe,
   Delete,
 } from '@nestjs/common';
 import { ResumeService } from './resume.service';
@@ -17,7 +14,7 @@ import { CreateProfessionalSummaryDto } from './dto/pro-summary.dto';
 import { CreateExperienceCategoryDto } from './dto/experience-category.dto';
 import { CreateExperienceDto } from './dto/experience.dto';
 import { CreateSkillCategoryDto } from './dto/skill-category.dto';
-import { CreateCreateSkillDto } from './dto/skill.dto';
+import { CreateSkillDto } from './dto/skill.dto';
 import { CreateCertificateDto } from './dto/certificate.dto';
 import { CreateCourseDto } from './dto/course.dto';
 import { CreateInterestDto } from './dto/interest.dto';
@@ -26,6 +23,17 @@ import { CreateEducationDto } from './dto/education.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Paginate, PaginateQuery, PaginatedSwaggerDocs } from 'nestjs-paginate';
 import { Resume } from './entity/resume.entity';
+import { SkillCategory } from './entity/skill-category.entity';
+import { ExperienceCategory } from './entity/experience-category.entity';
+import { Experience } from './entity/experience.entity';
+import { Skill } from './entity/skill.entity';
+import { Certificate } from './entity/certificate.entity';
+import { Course } from './entity/course.entity';
+import { Interest } from './entity/interest.entity';
+import { Additional } from './entity/additional.entity';
+import { PersonalInfo } from './entity/personal-info.entity';
+import { ProfessionalSummary } from './entity/pro-summary.entity';
+import { Education } from './entity/education.entity';
 
 @ApiTags('resume')
 @ApiBearerAuth()
@@ -33,34 +41,42 @@ import { Resume } from './entity/resume.entity';
 export class ResumeController {
   constructor(private readonly resumeService: ResumeService) {}
 
-  @Post()
+  @Post('/create')
   async createResume(@Body() resume: CreateResumeDto) {
     return await this.resumeService.createResume({
       authorId: resume.authorId,
     });
   }
 
-  @Get(':id')
+  @Get('/single/:id')
   async singleResume(@Param('id') id: string) {
-    return await this.resumeService.getResume(id);
+    return await this.resumeService.singleResume(id);
   }
 
-  @Get('/user/:userId')
-  async listUserResume(@Param('userId') userId: string) {
-    return await this.resumeService.listUserResume(userId);
-  }
-
-  @Get()
+  @Get('/list/user/:userId')
   @PaginatedSwaggerDocs(Resume, {
     loadEagerRelations: true,
     sortableColumns: ['createdAt', 'updatedAt'],
     defaultSortBy: [['createdAt', 'DESC']],
   })
-  async allResume(@Paginate() query: PaginateQuery) {
-    return await this.resumeService.findAllResumes(query);
+  async listUserResume(
+    @Param('userId') userId: string,
+    @Paginate() query: PaginateQuery,
+  ) {
+    return await this.resumeService.listUserResume(userId, query);
   }
 
-  @Post('personal-info/add/:resumeId')
+  @Get('list')
+  @PaginatedSwaggerDocs(Resume, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listResume(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listResume(query);
+  }
+
+  @Post('create/personal-info/:resumeId')
   async createPersonalInfo(
     @Param('resumeId') resumeId: string,
     @Body() personalInfo: CreatePersonalInfoDto,
@@ -68,7 +84,7 @@ export class ResumeController {
     return await this.resumeService.createPersonalInfo(resumeId, personalInfo);
   }
 
-  @Put('personal-info/:id')
+  @Put('update/personal-info/:id')
   async updatePersonalInfo(
     @Param('id') id: string,
     @Body() personalInfo: CreatePersonalInfoDto,
@@ -76,25 +92,22 @@ export class ResumeController {
     return await this.resumeService.updatePersonalInfo(id, personalInfo);
   }
 
-  @Get('personal-info/:id')
-  async getPersonalInfo(@Param('id') id: string) {
+  @Get('single/personal-info/:id')
+  async singlePersonalInfo(@Param('id') id: string) {
     return await this.resumeService.singlePersonalInfo(id);
   }
 
-  @Get('personal-info')
-  async allPersonalInfo(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.listPersonalInfo({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/personal-info',
-    });
+  @Get('list/personal-info')
+  @PaginatedSwaggerDocs(PersonalInfo, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listPersonalInfo(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listPersonalInfo(query);
   }
 
-  @Post('summary/:resumeId')
+  @Post('create/summary/:resumeId')
   async createSummary(
     @Param('resumeId') resumeId: string,
     @Body() summary: CreateProfessionalSummaryDto,
@@ -102,7 +115,7 @@ export class ResumeController {
     return await this.resumeService.createSummary(resumeId, summary);
   }
 
-  @Put('summary/:id')
+  @Put('update/summary/:id')
   async updateSummary(
     @Param('id') id: string,
     @Body() summary: CreateProfessionalSummaryDto,
@@ -110,25 +123,22 @@ export class ResumeController {
     return await this.resumeService.updateSummary(id, summary);
   }
 
-  @Get('summary/:id')
+  @Get('single/summary/:id')
   async getSummary(@Param('id') id: string) {
     return await this.resumeService.singleSummary(id);
   }
 
-  @Get('summary')
-  async allSummary(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.listSummary({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/summary',
-    });
+  @Get('list/summary')
+  @PaginatedSwaggerDocs(ProfessionalSummary, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listSummary(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listSummary(query);
   }
 
-  @Post('experience-category/:id')
+  @Post('create/experience-category/:id')
   async createExperienceCategory(
     @Param('id') id: string,
     @Body() experienceCategory: CreateExperienceCategoryDto,
@@ -139,7 +149,7 @@ export class ResumeController {
     );
   }
 
-  @Put('experience-category/:id')
+  @Put('update/experience-category/:id')
   async updateExperienceCategory(
     @Param('id') id: string,
     @Body() experienceCategory: CreateExperienceCategoryDto,
@@ -150,25 +160,22 @@ export class ResumeController {
     );
   }
 
-  @Get('experience-category/:id')
+  @Get('single/experience-category/:id')
   async getExperienceCategory(@Param('id') id: string) {
     return await this.resumeService.getExperienceCategory(id);
   }
 
-  @Get('experience-category')
-  async allExperienceCategory(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllExperienceCategories({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/experience-category',
-    });
+  @Get('list/experience-category')
+  @PaginatedSwaggerDocs(ExperienceCategory, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listExperienceCategory(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listExperienceCategory(query);
   }
 
-  @Post('experience/:id')
+  @Post('create/experience/:id')
   async createExperience(
     @Param('id') id: string,
     @Body() experience: CreateExperienceDto,
@@ -176,7 +183,7 @@ export class ResumeController {
     return await this.resumeService.createExperience(id, experience);
   }
 
-  @Put('experience/:id')
+  @Put('update/experience/:id')
   async updateExperience(
     @Param('id') id: string,
     @Body() experience: CreateExperienceDto,
@@ -184,25 +191,22 @@ export class ResumeController {
     return await this.resumeService.updateExperience(id, experience);
   }
 
-  @Get('experience/:id')
-  async getExperience(@Param('id') id: string) {
-    return await this.resumeService.getExperience(id);
+  @Get('single/experience/:id')
+  async singleExperience(@Param('id') id: string) {
+    return await this.resumeService.singleExperience(id);
   }
 
-  @Get('experience')
-  async allExperience(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllExperiences({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/experience',
-    });
+  @Get('list/experience')
+  @PaginatedSwaggerDocs(Experience, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listExperience(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listExperience(query);
   }
 
-  @Post('skill-category/:id')
+  @Post('create/skill-category/:id')
   async createSkillCategory(
     @Param('id') id: string,
     @Body() skillCategory: CreateSkillCategoryDto,
@@ -210,7 +214,7 @@ export class ResumeController {
     return await this.resumeService.createSkillCategory(id, skillCategory);
   }
 
-  @Put('skill-category/:id')
+  @Put('update/skill-category/:id')
   async updateSkillCategory(
     @Param('id') id: string,
     @Body() skillCategory: CreateSkillCategoryDto,
@@ -218,59 +222,47 @@ export class ResumeController {
     return await this.resumeService.updateSkillCategory(id, skillCategory);
   }
 
-  @Get('skill-category/:id')
+  @Get('single/skill-category/:id')
   async getSkillCategory(@Param('id') id: string) {
-    return await this.resumeService.getSkillCategory(id);
+    return await this.resumeService.singleSkillCategory(id);
   }
 
-  @Get('skill-category')
-  async allSkillCategory(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllSkillCategories({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/skill-category',
-    });
+  @Get('list/skill-category')
+  @PaginatedSwaggerDocs(SkillCategory, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listSkillCategory(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listSkillCategories(query);
   }
 
-  @Post('skill/:id')
-  async createSkill(
-    @Param('id') id: string,
-    @Body() skill: CreateCreateSkillDto,
-  ) {
+  @Post('create/skill/:id')
+  async createSkill(@Param('id') id: string, @Body() skill: CreateSkillDto) {
     return await this.resumeService.createSkill(id, skill);
   }
 
-  @Put('skill/:id')
-  async updateSkill(
-    @Param('id') id: string,
-    @Body() skill: CreateCreateSkillDto,
-  ) {
+  @Put('update/skill/:id')
+  async updateSkill(@Param('id') id: string, @Body() skill: CreateSkillDto) {
     return await this.resumeService.updateSkill(id, skill);
   }
 
-  @Get('skill/:id')
+  @Get('single/skill/:id')
   async getSkill(@Param('id') id: string) {
-    return await this.resumeService.getSkill(id);
+    return await this.resumeService.singleSkill(id);
   }
 
-  @Get('skill')
-  async allSkill(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllSkills({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/skill',
-    });
+  @Get('list/skill')
+  @PaginatedSwaggerDocs(Skill, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listSkill(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listSkill(query);
   }
 
-  @Post('certificate/:id')
+  @Post('create/certificate/:id')
   async createCertificate(
     @Param('id') id: string,
     @Body() certificate: CreateCertificateDto,
@@ -278,7 +270,7 @@ export class ResumeController {
     return await this.resumeService.createCertificate(id, certificate);
   }
 
-  @Put('certificate/:id')
+  @Put('update/certificate/:id')
   async updateCertificate(
     @Param('id') id: string,
     @Body() certificate: CreateCertificateDto,
@@ -286,53 +278,47 @@ export class ResumeController {
     return await this.resumeService.updateCertificate(id, certificate);
   }
 
-  @Get('certificate/:id')
+  @Get('single/certificate/:id')
   async getCertificate(@Param('id') id: string) {
-    return await this.resumeService.getCertificate(id);
+    return await this.resumeService.singleCertificate(id);
   }
 
-  @Get('certificate')
-  async allCertificate(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllCertificates({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/certificate',
-    });
+  @Get('list/certificate')
+  @PaginatedSwaggerDocs(Certificate, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listCertificate(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listCertificate(query);
   }
 
-  @Post('course/:id')
+  @Post('create/course/:id')
   async createCourse(@Param('id') id: string, @Body() course: CreateCourseDto) {
     return await this.resumeService.createCourse(id, course);
   }
 
-  @Put('course/:id')
+  @Put('update/course/:id')
   async updateCourse(@Param('id') id: string, @Body() course: CreateCourseDto) {
     return await this.resumeService.updateCourse(id, course);
   }
 
-  @Get('course/:id')
+  @Get('single/course/:id')
   async getCourse(@Param('id') id: string) {
-    return await this.resumeService.getCourse(id);
+    return await this.resumeService.singleCourse(id);
   }
 
-  @Get('course')
-  async allCourse(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit = 10,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllCourses({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/course',
-    });
+  @Get('list/course')
+  @PaginatedSwaggerDocs(Course, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listCourse(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listCourse(query);
   }
 
-  @Post('interest/:id')
+  @Post('create/interest/:id')
   async createInterest(
     @Param('id') id: string,
     @Body() interest: CreateInterestDto,
@@ -340,7 +326,7 @@ export class ResumeController {
     return await this.resumeService.createInterest(id, interest);
   }
 
-  @Put('interest/:id')
+  @Put('update/interest/:id')
   async updateInterest(
     @Param('id') id: string,
     @Body() interest: CreateInterestDto,
@@ -348,25 +334,22 @@ export class ResumeController {
     return await this.resumeService.updateInterest(id, interest);
   }
 
-  @Get('interest/:id')
+  @Get('single/interest/:id')
   async getInterest(@Param('id') id: string) {
-    return await this.resumeService.getInterest(id);
+    return await this.resumeService.singleInterest(id);
   }
 
-  @Get('interest')
-  async allInterest(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit = 5,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllInterests({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/interest',
-    });
+  @Get('list/interest')
+  @PaginatedSwaggerDocs(Interest, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listInterest(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listInterest(query);
   }
 
-  @Post('additional/:id')
+  @Post('create/additional/:id')
   async createAdditional(
     @Param('id') id: string,
     @Body() additional: CreateAdditionalDto,
@@ -374,7 +357,7 @@ export class ResumeController {
     return await this.resumeService.createAdditional(id, additional);
   }
 
-  @Put('additional/:id')
+  @Put('update/additional/:id')
   async updateAdditional(
     @Param('id') id: string,
     @Body() additional: CreateAdditionalDto,
@@ -382,25 +365,22 @@ export class ResumeController {
     return await this.resumeService.updateAdditional(id, additional);
   }
 
-  @Get('additional/:id')
+  @Get('single/additional/:id')
   async getAdditional(@Param('id') id: string) {
-    return await this.resumeService.getAdditional(id);
+    return await this.resumeService.singleAdditional(id);
   }
 
-  @Get('additional')
-  async allAdditional(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit = 5,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllAdditional({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/additional',
-    });
+  @Get('list/additional')
+  @PaginatedSwaggerDocs(Additional, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listAdditional(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listAdditional(query);
   }
 
-  @Post('education/:id')
+  @Post('create/education/:id')
   async createEducation(
     @Param('id') id: string,
     @Body() education: CreateEducationDto,
@@ -408,7 +388,7 @@ export class ResumeController {
     return await this.resumeService.createEducation(id, education);
   }
 
-  @Put('education/:id')
+  @Put('update/education/:id')
   async updateEducation(
     @Param('id') id: string,
     @Body() education: CreateEducationDto,
@@ -416,68 +396,65 @@ export class ResumeController {
     return await this.resumeService.updateEducation(id, education);
   }
 
-  @Get('education/:id')
+  @Get('single/education/:id')
   async getEducation(@Param('id') id: string) {
-    return await this.resumeService.getEducation(id);
+    return await this.resumeService.singleEducation(id);
   }
 
-  @Get('education')
-  async allEducation(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page = 1,
-    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit = 5,
-  ) {
-    limit = limit > 100 ? 100 : limit;
-    return await this.resumeService.findAllEducations({
-      page,
-      limit,
-      route: 'http://loclahost:4000/resume/education',
-    });
+  @Get('list/education')
+  @PaginatedSwaggerDocs(Education, {
+    loadEagerRelations: true,
+    sortableColumns: ['createdAt', 'updatedAt'],
+    defaultSortBy: [['createdAt', 'DESC']],
+  })
+  async listEducation(@Paginate() query: PaginateQuery) {
+    return await this.resumeService.listEducation(query);
   }
-  @Delete('resume:id')
+  @Delete('del/resume/:id')
   async deleteResume(@Param('id') id: string) {
     return await this.resumeService.deleteResume(id);
   }
-  @Delete('personal-info:id')
+  @Delete('del/personal-info/:id')
   async deletePersonalInfo(@Param('id') id: string) {
     return await this.resumeService.deletePersonalInfo(id);
   }
-  @Delete('summary:id')
+  @Delete('del/summary/:id')
   async deleteSummary(@Param('id') id: string) {
     return await this.resumeService.deleteSummary(id);
   }
-  @Delete('experience-category:id')
+  @Delete('del/experience-category/:id')
   async deleteExperienceCategory(@Param('id') id: string) {
     return await this.resumeService.deleteExperienceCategory(id);
   }
-  @Delete('experience:id')
+  @Delete('del/experience/:id')
   async deleteExperience(@Param('id') id: string) {
     return await this.resumeService.deleteExperience(id);
   }
-  @Delete('skill-category:id')
+  @Delete('del/skill-category/:id')
   async deleteSkillCategory(@Param('id') id: string) {
     return await this.resumeService.deleteSkillCategory(id);
   }
-  @Delete('skill:id')
+  @Delete('del/skill/:id')
   async deleteSkill(@Param('id') id: string) {
     return await this.resumeService.deleteSkill(id);
   }
-  @Delete('certificate:id')
+  @Delete('del/certificate/:id')
   async deleteCertificate(@Param('id') id: string) {
     return await this.resumeService.deleteCertificate(id);
   }
-  @Delete('course:id')
+  @Delete('del/course/:id')
   async deleteCourse(@Param('id') id: string) {
     return await this.resumeService.deleteCourse(id);
   }
-  @Delete('interest:id')
+  @Delete('del/interest/:id')
   async deleteInterest(@Param('id') id: string) {
     return await this.resumeService.deleteInterest(id);
   }
-  @Delete('additional:id')
+  @Delete('del/additional/:id')
   async deleteAdditional(@Param('id') id: string) {
     return await this.resumeService.deleteAdditional(id);
   }
-  @Delete('education:id')
+  @Delete('del/education/:id')
   async deleteEducation(@Param('id') id: string) {
     return await this.resumeService.deleteEducation(id);
   }

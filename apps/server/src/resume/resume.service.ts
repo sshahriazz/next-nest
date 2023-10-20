@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Resume } from './entity/resume.entity';
 import { PersonalInfo } from './entity/personal-info.entity';
@@ -19,27 +19,18 @@ import { CreateProfessionalSummaryDto } from './dto/pro-summary.dto';
 import { CreateExperienceCategoryDto } from './dto/experience-category.dto';
 import { CreateExperienceDto } from './dto/experience.dto';
 import { CreateSkillCategoryDto } from './dto/skill-category.dto';
-import { CreateCreateSkillDto } from './dto/skill.dto';
+import { CreateSkillDto, UpdateSkillDto } from './dto/skill.dto';
 import { CreateCertificateDto } from './dto/certificate.dto';
 import { CreateCourseDto } from './dto/course.dto';
 import { CreateInterestDto } from './dto/interest.dto';
 import { CreateAdditionalDto } from './dto/additional.dto';
 import { CreateEducationDto } from './dto/education.dto';
-import { IPaginationOptions, paginate } from 'nestjs-typeorm-paginate';
 import {
   PaginateQuery,
   Paginated,
   paginate as Paginate,
 } from 'nestjs-paginate';
-
-/**
- * TODO: fix naming convention
- * TODO: fix and reduce dto
- * TODO: fix and reduce api endpoints
- * TODO: Check if all service methods are functional
- * TODO: write tests
- * @ResumeService
- */
+import { startOfMonth, startOfWeek } from 'date-fns';
 
 @Injectable()
 export class ResumeService {
@@ -70,31 +61,116 @@ export class ResumeService {
     private readonly educationRepository: Repository<Education>,
   ) {}
 
+  queryConfig = {};
+
+  async getStats(repository: Repository<any>, since: Date, until: Date) {
+    const stats = {
+      total: 0,
+      created: 0,
+      deleted: 0,
+      updated: 0,
+      currentMonth: {
+        total: 0,
+        created: 0,
+        deleted: 0,
+        updated: 0,
+      },
+      currentWeek: {
+        total: 0,
+        created: 0,
+        deleted: 0,
+        updated: 0,
+      },
+    };
+
+    const entities = await repository.find({
+      where: {
+        createdAt: Between(since, until),
+      },
+    });
+
+    for (const entity of entities) {
+      const { createdAt, deletedAt, updatedAt } = entity;
+
+      // Increment total count
+      stats.total++;
+
+      // Increment current month count
+      if (createdAt >= startOfMonth(new Date())) {
+        stats.currentMonth.total++;
+        if (deletedAt) {
+          stats.currentMonth.deleted++;
+        } else if (updatedAt > createdAt) {
+          stats.currentMonth.updated++;
+        } else {
+          stats.currentMonth.created++;
+        }
+      }
+
+      // Increment current week count
+      if (createdAt >= startOfWeek(new Date())) {
+        stats.currentWeek.total++;
+        if (deletedAt) {
+          stats.currentWeek.deleted++;
+        } else if (updatedAt > createdAt) {
+          stats.currentWeek.updated++;
+        } else {
+          stats.currentWeek.created++;
+        }
+      }
+
+      // Increment created, updated, or deleted count
+      if (deletedAt) {
+        stats.deleted++;
+      } else if (updatedAt > createdAt) {
+        stats.updated++;
+      } else {
+        stats.created++;
+      }
+    }
+
+    return stats;
+  }
+
   async createResume(resume: CreateResumeDto) {
     return await this.resumeRepository.save({
       author: { id: resume.authorId },
     });
   }
 
-  async getResume(id: string) {
+  async singleResume(id: string) {
     return await this.resumeRepository.findOne({
       where: { id },
     });
   }
 
-  async listUserResume(userId: string) {
-    return await this.resumeRepository.find({
-      where: { author: { id: userId } },
-    });
-  }
-
-  async findAllResumes(query: PaginateQuery): Promise<Paginated<Resume>> {
+  async listUserResume(
+    userId: string,
+    query: PaginateQuery,
+  ): Promise<Paginated<Resume>> {
     return await Paginate(query, this.resumeRepository, {
+      ...this.queryConfig,
+      where: { author: { id: userId } },
       loadEagerRelations: true,
+      relations: ['author', 'personalInfo', 'professionalSummary'],
       sortableColumns: ['id', 'createdAt', 'updatedAt'],
       nullSort: 'last',
       defaultSortBy: [['createdAt', 'DESC']],
     });
+  }
+
+  async listResume(query: PaginateQuery): Promise<Paginated<Resume>> {
+    return await Paginate(query, this.resumeRepository, {
+      loadEagerRelations: true,
+      relations: ['author', 'personalInfo', 'professionalSummary'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
+  }
+
+  async resumeStats(since: Date, until: Date) {
+    return await this.getStats(this.resumeRepository, since, until);
   }
 
   async createPersonalInfo(
@@ -139,11 +215,23 @@ export class ResumeService {
     });
   }
 
-  async listPersonalInfo(options: IPaginationOptions) {
+  async listPersonalInfo(
+    query: PaginateQuery,
+  ): Promise<Paginated<PersonalInfo>> {
     const queryBuilder =
       this.personalInfoRepository.createQueryBuilder('personal_info');
     queryBuilder.orderBy('personal_info.createdAt', 'DESC');
-    return await paginate<PersonalInfo>(queryBuilder, options);
+    return await Paginate(query, this.personalInfoRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
+  }
+
+  async personalStats(since: Date, until: Date) {
+    return await this.getStats(this.personalInfoRepository, since, until);
   }
 
   async createSummary(
@@ -187,10 +275,16 @@ export class ResumeService {
     });
   }
 
-  async listSummary(options: IPaginationOptions) {
-    const queryBuilder = this.summaryRepository.createQueryBuilder('summary');
-    queryBuilder.orderBy('summary.createdAt', 'DESC');
-    return await paginate<ProfessionalSummary>(queryBuilder, options);
+  async listSummary(
+    query: PaginateQuery,
+  ): Promise<Paginated<ProfessionalSummary>> {
+    return await Paginate(query, this.summaryRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createExperienceCategory(
@@ -219,11 +313,16 @@ export class ResumeService {
     });
   }
 
-  async findAllExperienceCategories(options: IPaginationOptions) {
-    const queryBuilder =
-      this.experienceCategoryRepository.createQueryBuilder('category');
-    queryBuilder.orderBy('category.createdAt', 'DESC');
-    return await paginate<ExperienceCategory>(queryBuilder, options);
+  async listExperienceCategory(
+    query: PaginateQuery,
+  ): Promise<Paginated<ExperienceCategory>> {
+    return await Paginate(query, this.experienceCategoryRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createExperience(id: string, experience: CreateExperienceDto) {
@@ -237,16 +336,20 @@ export class ResumeService {
     return await this.experienceRepository.update(id, experience);
   }
 
-  async getExperience(id: string) {
+  async singleExperience(id: string) {
     return await this.experienceRepository.findOne({
       where: { id },
     });
   }
 
-  async findAllExperiences(options: IPaginationOptions) {
-    const queryBuilder = this.experienceRepository.createQueryBuilder('exp');
-    queryBuilder.orderBy('exp.createdAt', 'DESC');
-    return await paginate<Experience>(queryBuilder, options);
+  async listExperience(query: PaginateQuery): Promise<Paginated<Experience>> {
+    return await Paginate(query, this.experienceRepository, {
+      loadEagerRelations: true,
+      relations: ['category'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createSkillCategory(id: string, skillCategory: CreateSkillCategoryDto) {
@@ -260,40 +363,49 @@ export class ResumeService {
     return await this.skillCategoryRepository.update(id, skillCategory);
   }
 
-  async getSkillCategory(id: string) {
+  async singleSkillCategory(id: string) {
     return await this.skillCategoryRepository.findOne({
       where: { id },
     });
   }
 
-  async findAllSkillCategories(options: IPaginationOptions) {
-    const queryBuilder =
-      this.skillCategoryRepository.createQueryBuilder('category');
-    queryBuilder.orderBy('category.createdAt', 'DESC');
-    return await paginate<SkillCategory>(queryBuilder, options);
+  async listSkillCategories(
+    query: PaginateQuery,
+  ): Promise<Paginated<SkillCategory>> {
+    return await Paginate(query, this.skillCategoryRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
-  async createSkill(id: string, skill: CreateCreateSkillDto) {
+  async createSkill(id: string, skill: CreateSkillDto) {
     return await this.skillRepository.save({
       category: { id },
       ...skill,
     });
   }
 
-  async updateSkill(id: string, skill: CreateCreateSkillDto) {
+  async updateSkill(id: string, skill: UpdateSkillDto) {
     return await this.skillRepository.update(id, skill);
   }
 
-  async getSkill(id: string) {
+  async singleSkill(id: string) {
     return await this.skillRepository.findOne({
       where: { id },
     });
   }
 
-  async findAllSkills(options: IPaginationOptions) {
-    const queryBuilder = this.skillRepository.createQueryBuilder('skill');
-    queryBuilder.orderBy('skill.createdAt', 'DESC');
-    return await paginate<Skill>(queryBuilder, options);
+  async listSkill(query: PaginateQuery): Promise<Paginated<Skill>> {
+    return await Paginate(query, this.skillRepository, {
+      loadEagerRelations: true,
+      relations: ['skillCategory'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createCertificate(id: string, certificate: CreateCertificateDto) {
@@ -307,17 +419,23 @@ export class ResumeService {
     return await this.certificateRepository.update(id, certificate);
   }
 
-  async getCertificate(id: string) {
+  async singleCertificate(id: string) {
     return await this.certificateRepository.findOne({
       where: { id },
     });
   }
 
-  async findAllCertificates(options: IPaginationOptions) {
+  async listCertificate(query: PaginateQuery): Promise<Paginated<Certificate>> {
     const queryBuilder =
       this.certificateRepository.createQueryBuilder('certificate');
     queryBuilder.orderBy('certificate.createdAt', 'DESC');
-    return await paginate<Certificate>(queryBuilder, options);
+    return await Paginate(query, this.certificateRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createCourse(id: string, course: CreateCourseDto) {
@@ -331,16 +449,20 @@ export class ResumeService {
     return await this.courseRepository.update(id, course);
   }
 
-  async getCourse(id: string) {
+  async singleCourse(id: string) {
     return await this.courseRepository.findOne({
       where: { id },
     });
   }
 
-  async findAllCourses(options: IPaginationOptions) {
-    const queryBuilder = this.courseRepository.createQueryBuilder('course');
-    queryBuilder.orderBy('course.createdAt', 'DESC');
-    return await paginate<Course>(queryBuilder, options);
+  async listCourse(query: PaginateQuery): Promise<Paginated<Course>> {
+    return await Paginate(query, this.courseRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createInterest(id: string, interest: CreateInterestDto) {
@@ -354,16 +476,20 @@ export class ResumeService {
     return await this.interestRepository.update(id, interest);
   }
 
-  async getInterest(id: string) {
+  async singleInterest(id: string) {
     return await this.interestRepository.findOne({
       where: { id },
     });
   }
 
-  async findAllInterests(options: IPaginationOptions) {
-    const queryBuilder = this.interestRepository.createQueryBuilder('interest');
-    queryBuilder.orderBy('interest.createdAt', 'DESC');
-    return await paginate<Interest>(queryBuilder, options);
+  async listInterest(query: PaginateQuery): Promise<Paginated<Interest>> {
+    return await Paginate(query, this.interestRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createAdditional(id: string, additional: CreateAdditionalDto) {
@@ -377,17 +503,20 @@ export class ResumeService {
     return await this.additionalRepository.update(id, additional);
   }
 
-  async getAdditional(id: string) {
+  async singleAdditional(id: string) {
     return await this.additionalRepository.findOne({
       where: { id },
     });
   }
 
-  async findAllAdditional(options: IPaginationOptions) {
-    const queryBuilder =
-      this.additionalRepository.createQueryBuilder('additional');
-    queryBuilder.orderBy('additional.createdAt', 'DESC');
-    return await paginate<Additional>(queryBuilder, options);
+  async listAdditional(query: PaginateQuery): Promise<Paginated<Additional>> {
+    return await Paginate(query, this.additionalRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
 
   async createEducation(id: string, education: CreateEducationDto) {
@@ -400,15 +529,19 @@ export class ResumeService {
     return await this.educationRepository.update(id, education);
   }
 
-  async getEducation(id: string) {
+  async singleEducation(id: string) {
     return await this.educationRepository.findOne({
       where: { id },
     });
   }
-  async findAllEducations(options: IPaginationOptions) {
-    const queryBuilder = this.educationRepository.createQueryBuilder('edu');
-    queryBuilder.orderBy('edu.createdAt', 'DESC');
-    return await paginate<Education>(queryBuilder, options);
+  async listEducation(query: PaginateQuery): Promise<Paginated<Education>> {
+    return await Paginate(query, this.educationRepository, {
+      loadEagerRelations: true,
+      relations: ['resume'],
+      sortableColumns: ['id', 'createdAt', 'updatedAt'],
+      nullSort: 'last',
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
   async deleteResume(id: string) {
     return await this.resumeRepository.delete(id);

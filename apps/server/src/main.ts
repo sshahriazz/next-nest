@@ -12,12 +12,7 @@ import {
   SessionConfig,
 } from '@server/common/configs/config.interface';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import {
-  HttpException,
-  HttpStatus,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,26 +25,12 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: false,
-      // exceptionFactory: (errors) => {
-      //   return new HttpException(
-      //     {
-      //       statusCode: 400,
-      //       message: errors.map((error) => {
-      //         return {
-      //           property: error.property,
-      //           constraints: Object.values(error.constraints).join(', '),
-      //         };
-      //       }),
-      //     },
-      //     400,
-      //   );
-      // },
     }),
   );
 
   if (corsConfig.enabled) {
     app.enableCors({
-      origin: 'http://localhost:3000',
+      origin: corsConfig.origins[0],
       credentials: true,
     });
   }

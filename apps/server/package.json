@@ -36,6 +36,7 @@
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
+    "date-fns": "^2.30.0",
     "express-session": "^1.17.3",
     "googleapis": "^126.0.1",
     "handlebars": "^4.7.8",
