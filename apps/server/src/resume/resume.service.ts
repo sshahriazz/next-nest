@@ -194,7 +194,6 @@ export class ResumeService {
       if (existing?.personalInfo?.id) {
         await this.personalInfoRepository.delete(existing.personalInfo.id);
       }
-      console.log(newPersonalInfoData);
 
       return newPersonalInfoData;
     } else {
@@ -253,7 +252,6 @@ export class ResumeService {
       if (existing?.professionalSummary?.id) {
         await this.summaryRepository.delete(existing.professionalSummary.id);
       }
-      console.log(newSummaryData);
 
       return newSummaryData;
     } else {
@@ -285,6 +283,10 @@ export class ResumeService {
       nullSort: 'last',
       defaultSortBy: [['createdAt', 'DESC']],
     });
+  }
+
+  async summaryStats(since: Date, until: Date) {
+    return await this.getStats(this.summaryRepository, since, until);
   }
 
   async createExperienceCategory(
@@ -325,6 +327,10 @@ export class ResumeService {
     });
   }
 
+  async experienceCategoryStats(since: Date, until: Date) {
+    return await this.getStats(this.experienceCategoryRepository, since, until);
+  }
+
   async createExperience(id: string, experience: CreateExperienceDto) {
     return await this.experienceRepository.save({
       category: { id },
@@ -350,6 +356,10 @@ export class ResumeService {
       nullSort: 'last',
       defaultSortBy: [['createdAt', 'DESC']],
     });
+  }
+
+  async experienceStats(since: Date, until: Date) {
+    return await this.getStats(this.experienceRepository, since, until);
   }
 
   async createSkillCategory(id: string, skillCategory: CreateSkillCategoryDto) {
@@ -381,6 +391,10 @@ export class ResumeService {
     });
   }
 
+  async skillCategoryStats(since: Date, until: Date) {
+    return await this.getStats(this.skillCategoryRepository, since, until);
+  }
+
   async createSkill(id: string, skill: CreateSkillDto) {
     return await this.skillRepository.save({
       category: { id },
@@ -406,6 +420,10 @@ export class ResumeService {
       nullSort: 'last',
       defaultSortBy: [['createdAt', 'DESC']],
     });
+  }
+
+  async skillStats(since: Date, until: Date) {
+    return await this.getStats(this.skillRepository, since, until);
   }
 
   async createCertificate(id: string, certificate: CreateCertificateDto) {
@@ -438,6 +456,10 @@ export class ResumeService {
     });
   }
 
+  async certificateStats(since: Date, until: Date) {
+    return await this.getStats(this.certificateRepository, since, until);
+  }
+
   async createCourse(id: string, course: CreateCourseDto) {
     return await this.courseRepository.save({
       resume: { id },
@@ -463,6 +485,10 @@ export class ResumeService {
       nullSort: 'last',
       defaultSortBy: [['createdAt', 'DESC']],
     });
+  }
+
+  async courseStats(since: Date, until: Date) {
+    return await this.getStats(this.courseRepository, since, until);
   }
 
   async createInterest(id: string, interest: CreateInterestDto) {
@@ -492,6 +518,10 @@ export class ResumeService {
     });
   }
 
+  async interestStats(since: Date, until: Date) {
+    return await this.getStats(this.interestRepository, since, until);
+  }
+
   async createAdditional(id: string, additional: CreateAdditionalDto) {
     return await this.additionalRepository.save({
       resume: { id },
@@ -519,6 +549,10 @@ export class ResumeService {
     });
   }
 
+  async additionalStats(since: Date, until: Date) {
+    return await this.getStats(this.additionalRepository, since, until);
+  }
+
   async createEducation(id: string, education: CreateEducationDto) {
     return await this.educationRepository.save({
       resume: { id },
@@ -543,6 +577,11 @@ export class ResumeService {
       defaultSortBy: [['createdAt', 'DESC']],
     });
   }
+
+  async educationStats(since: Date, until: Date) {
+    return await this.getStats(this.educationRepository, since, until);
+  }
+
   async deleteResume(id: string) {
     return await this.resumeRepository.delete(id);
   }

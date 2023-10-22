@@ -9,9 +9,6 @@ import { AuthModule } from './auth/auth.module';
 import { DbConfig } from './common/configs/config.interface';
 import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter';
 import { ResumeModule } from './resume/resume.module';
-import { MailerModule as MailingModule } from './mailer/mailer.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -45,17 +42,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     UsersModule,
     AuthModule,
     ResumeModule,
-    MailingModule,
-    MailerModule.forRoot({
-      transport: 'smtps://user@domain.com:pass@smtp.domain.com',
-      template: {
-        dir: process.cwd() + '/templates/',
-        adapter: new HandlebarsAdapter(),
-        options: {
-          strict: true,
-        },
-      },
-    }),
   ],
   providers: [
     {

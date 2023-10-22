@@ -19,15 +19,11 @@ import { UserRole } from '@server/users/entities/user.entity';
 import { ResponseObject } from '@server/common/configs/config.interface';
 import { LoginResponse, SignupResponse } from './entities/token.entity';
 import { Request, Response } from 'express';
-import { MailerService } from '@server/mailer/mailer.service';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly mailerService: MailerService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
   @IsPublic()
@@ -80,15 +76,15 @@ export class AuthController {
     @Query('callback') callback: string,
   ) {
     const link = await this.authService.verifyUserEmail(email, callback);
-    await this.mailerService.sendMail(
-      {
-        name: email,
-        verificationLink: link,
-        companyName: 'Coding Ninja',
-      },
-      'action',
-      email,
-    );
+    // await this.mailerService.sendMail(
+    //   {
+    //     name: email,
+    //     verificationLink: link,
+    //     companyName: 'Coding Ninja',
+    //   },
+    //   'action',
+    //   email,
+    // );
     return {
       status: HttpStatus.OK,
     };

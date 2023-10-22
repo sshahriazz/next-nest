@@ -9,11 +9,9 @@ import { JwtStrategy } from './jwt.strategy';
 import { PasswordService } from './password.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@server/users/entities/user.entity';
-import { MailerModule } from '@server/mailer/mailer.module';
 
 @Module({
   imports: [
-    MailerModule,
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

@@ -20,7 +20,7 @@ import { CreateCourseDto } from './dto/course.dto';
 import { CreateInterestDto } from './dto/interest.dto';
 import { CreateAdditionalDto } from './dto/additional.dto';
 import { CreateEducationDto } from './dto/education.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Paginate, PaginateQuery, PaginatedSwaggerDocs } from 'nestjs-paginate';
 import { Resume } from './entity/resume.entity';
 import { SkillCategory } from './entity/skill-category.entity';
@@ -410,6 +410,53 @@ export class ResumeController {
   async listEducation(@Paginate() query: PaginateQuery) {
     return await this.resumeService.listEducation(query);
   }
+
+  @Get('stats/:since/:until')
+  @ApiParam({ type: Date, name: 'since', example: '2021-01-01' })
+  @ApiParam({ type: Date, name: 'until', example: '2021-12-31' })
+  async resumeStats(@Param('since') since: Date, @Param('until') until: Date) {
+    const resumeStats = await this.resumeService.resumeStats(since, until);
+    const experienceCategoryStats =
+      await this.resumeService.experienceCategoryStats(since, until);
+    const experienceStats = await this.resumeService.experienceStats(
+      since,
+      until,
+    );
+    const skillCategoryStats = await this.resumeService.skillCategoryStats(
+      since,
+      until,
+    );
+    const skillStats = await this.resumeService.skillStats(since, until);
+    const certificateStats = await this.resumeService.certificateStats(
+      since,
+      until,
+    );
+    const courseStats = await this.resumeService.courseStats(since, until);
+    const interestStats = await this.resumeService.interestStats(since, until);
+    const additionalStats = await this.resumeService.additionalStats(
+      since,
+      until,
+    );
+    const educationStats = await this.resumeService.educationStats(
+      since,
+      until,
+    );
+
+    const combinedStats = {
+      resumeStats,
+      experienceCategoryStats,
+      experienceStats,
+      skillCategoryStats,
+      skillStats,
+      certificateStats,
+      courseStats,
+      interestStats,
+      additionalStats,
+      educationStats,
+    };
+    return combinedStats;
+  }
+
   @Delete('del/resume/:id')
   async deleteResume(@Param('id') id: string) {
     return await this.resumeService.deleteResume(id);

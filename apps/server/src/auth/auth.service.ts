@@ -20,7 +20,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserRole } from '@server/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { MailerService } from '@server/mailer/mailer.service';
 
 type JWTPayload = {
   userId: string;
@@ -37,7 +36,6 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
-    private readonly mailerService: MailerService,
   ) {}
 
   async createUser(payload: SignupInput): Promise<SignupResponse> {

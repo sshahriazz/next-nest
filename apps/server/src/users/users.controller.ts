@@ -24,12 +24,12 @@ export class UsersController {
   // @IsPublic()
   @Roles(UserRole.USER)
   findAll() {
-    return this.usersService.findAll();
+    return this.usersService.listUser();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+    return this.usersService.singleUser({ id });
   }
 
   @Patch(':id')
@@ -37,14 +37,14 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: string,
     @Body() updateUserDto: UpdateUserInput,
   ) {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.updateUser(id, updateUserDto);
   }
   @Patch('changepassword/:id')
   changePassword(
     @Param('id') id: string,
     @Body() changePassword: ChangePasswordInput,
   ) {
-    return this.usersService.changePassword({ id, ...changePassword });
+    return this.usersService.changePassword(id, changePassword);
   }
 
   @Delete(':id')

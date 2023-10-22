@@ -12,36 +12,47 @@ export class UsersService {
     private passwordService: PasswordService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
-  async findAll() {
+
+  async listUser() {
     return await this.userRepository.find();
   }
-  async findOne(id: string) {
-    return await this.userRepository.findOne({
-      where: { id },
-      relationLoadStrategy: 'query',
-    });
+  async singleUser({ id }: { id: string }) {
+    const user = await this.userRepository.findOneOrFail({ where: { id } });
+    return user;
   }
-  async update(id: string, updateUserDto: UpdateUserInput) {
-    return await this.userRepository.update(id, updateUserDto);
+  async updateUser(id: string, updateUserDto: UpdateUserInput) {
+    if (!id || !updateUserDto) {
+      throw new BadRequestException('Invalid input');
+    }
+
+    const user = await this.userRepository.findOneOrFail({ where: { id } });
+
+    Object.assign(user, updateUserDto);
+
+    return await this.userRepository.save(user);
   }
-  async changePassword(changePassword: ChangePasswordInput) {
-    const user = await this.userRepository.findOne({
-      where: { id: changePassword.id },
-    });
+
+  async changePassword(
+    id: string,
+    { oldPassword, newPassword }: ChangePasswordInput,
+  ) {
+    if (!id || !oldPassword || !newPassword) {
+      throw new BadRequestException('Invalid input');
+    }
+
+    const user = await this.userRepository.findOneOrFail({ where: { id } });
 
     const passwordValid = await this.passwordService.validatePassword(
-      changePassword.oldPassword,
+      oldPassword,
       user.password,
     );
     if (!passwordValid) {
       throw new BadRequestException('Invalid password');
     }
-    const hashedPassword = await this.passwordService.hashPassword(
-      changePassword.newPassword,
-    );
-    return await this.userRepository.update(user.id, {
-      password: hashedPassword,
-    });
+
+    const hashedPassword = await this.passwordService.hashPassword(newPassword);
+
+    return await this.userRepository.update(id, { password: hashedPassword });
   }
   async remove(id: string) {
     return await this.userRepository.delete(id);
