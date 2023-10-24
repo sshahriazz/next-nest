@@ -53,11 +53,11 @@ export interface SecurityConfig {
   expiresIn: string;
   refreshIn: string;
   bcryptSaltOrRound: string | number;
+  refreshSecret: string;
+  accessSecret: string;
 }
 
-export interface ResponseObject<T> {
-  message: string;
-  url: string;
+export class ApiResponse<T> {
   data?: T;
   status: HttpStatus;
 }

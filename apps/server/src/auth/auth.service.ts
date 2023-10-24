@@ -4,7 +4,7 @@ import {
   BadRequestException,
   ConflictException,
   UnauthorizedException,
-  HttpStatus,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -39,70 +39,93 @@ export class AuthService {
   ) {}
 
   async createUser(payload: SignupInput): Promise<SignupResponse> {
-    const hashedPassword = await this.passwordService.hashPassword(
-      payload.password,
-    );
+    try {
+      const hashedPassword = await this.passwordService.hashPassword(
+        payload.password,
+      );
 
-    const existingUser = await this.userRepository.findOne({
-      where: { email: payload.email },
-    });
+      const existingUser = await this.userRepository.findOne({
+        where: { email: payload.email },
+      });
 
-    if (existingUser) {
-      throw new ConflictException('User already exists');
+      if (existingUser) {
+        throw new ConflictException('User already exists');
+      }
+
+      const user = await this.userRepository.save({
+        ...payload,
+        password: hashedPassword,
+      });
+
+      if (!user) {
+        throw new Error('Failed to create user');
+      }
+
+      const constructUser = {
+        id: user.id,
+        role: user.role,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+      };
+
+      const tokens = this.generateTokens({ ...constructUser, userId: user.id });
+
+      if (!tokens) {
+        throw new Error('Failed to generate tokens');
+      }
+
+      return {
+        tokens,
+        user: constructUser,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
-
-    const user = await this.userRepository.save({
-      ...payload,
-      password: hashedPassword,
-    });
-
-    const constructUser = {
-      id: user.id,
-      role: user.role,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-    };
-
-    const tokens = this.generateTokens({ ...constructUser, userId: user.id });
-
-    return {
-      tokens,
-      user: constructUser,
-    } satisfies SignupResponse;
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
-    const user = await this.userRepository.findOne({ where: { email } });
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
 
-    if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`);
+      if (!user) {
+        throw new NotFoundException(`No user found for email: ${email}`);
+      }
+
+      const passwordValid = await this.passwordService.validatePassword(
+        password,
+        user.password,
+      );
+
+      if (!passwordValid) {
+        throw new BadRequestException('Invalid password');
+      }
+
+      const constructUser = {
+        id: user.id,
+        firstname: user.firstname,
+        role: user.role,
+        lastname: user.lastname,
+        email: user.email,
+      };
+
+      const tokens = this.generateTokens({ ...constructUser, userId: user.id });
+
+      if (!tokens) {
+        throw new Error('Failed to generate tokens');
+      }
+
+      return {
+        tokens,
+        user: constructUser,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
-
-    const passwordValid = await this.passwordService.validatePassword(
-      password,
-      user.password,
-    );
-
-    if (!passwordValid) {
-      throw new BadRequestException('Invalid password');
-    }
-    const constructUser = {
-      id: user.id,
-      firstname: user.firstname,
-      role: user.role,
-      lastname: user.lastname,
-      email: user.email,
-    };
-    const tokens = this.generateTokens({ ...constructUser, userId: user.id });
-    return {
-      tokens,
-      user: constructUser,
-    };
   }
 
   async validateUser(userId: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { id: userId } });
+    return await this.userRepository.findOneByOrFail({ id: userId });
   }
 
   async getUserFromToken(token: string): Promise<UserEntity> {
@@ -120,15 +143,17 @@ export class AuthService {
   }
 
   private generateAccessToken(payload: JWTPayload): string {
+    const securityConfig = this.configService.get<SecurityConfig>('security');
+
     return this.jwtService.sign(payload, {
-      expiresIn: '5s',
+      expiresIn: securityConfig.expiresIn,
     });
   }
 
   private generateRefreshToken(payload: { userId: string }): string {
     const securityConfig = this.configService.get<SecurityConfig>('security');
     return this.jwtService.sign(payload, {
-      secret: 'refresh-secret',
+      secret: securityConfig.refreshSecret,
       expiresIn: securityConfig.refreshIn,
     });
   }
@@ -149,6 +174,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
   }
+
   updateUserRole(userId: string, role: UserRole[]) {
     return this.userRepository.update(userId, { role });
   }
@@ -159,7 +185,7 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
     const newPassword = bcrypt.hashSync(password, 10);
-    this.userRepository.update(user.id, { password: newPassword });
+    return await this.userRepository.update(user.id, { password: newPassword });
   }
 
   async verifyEmailAndUpdateUser(token: string) {

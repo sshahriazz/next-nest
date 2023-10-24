@@ -1,6 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Additional } from '../entity/additional.entity';
 
-export class CreateAdditionalDto {
-  @ApiProperty({ type: String })
-  id: string;
-}
+export class CreateAdditionalDto extends Additional {}
+
+export class UpdateAdditionalDto extends CreateAdditionalDto {}

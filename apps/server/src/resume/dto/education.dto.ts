@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Education } from '../entity/education.entity';
 
-export class CreateEducationDto {
+export class CreateEducationDto extends Education {
   @ApiProperty({ type: String })
   id: string;
 
@@ -25,3 +26,5 @@ export class CreateEducationDto {
   @ApiProperty({ type: String })
   endYear: string;
 }
+
+export class UpdateEducationDto extends CreateEducationDto {}

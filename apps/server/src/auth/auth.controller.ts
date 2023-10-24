@@ -16,7 +16,7 @@ import { SignupInput } from './dto/signup.input';
 import { UserEntity } from './entities/user.entity';
 import { IsPublic } from './public.decorator';
 import { UserRole } from '@server/users/entities/user.entity';
-import { ResponseObject } from '@server/common/configs/config.interface';
+import { ApiResponse } from '@server/common/configs/config.interface';
 import { LoginResponse, SignupResponse } from './entities/token.entity';
 import { Request, Response } from 'express';
 
@@ -29,16 +29,14 @@ export class AuthController {
   @IsPublic()
   async signup(
     @Body() signupInput: SignupInput,
-  ): Promise<ResponseObject<SignupResponse>> {
+  ): Promise<ApiResponse<SignupResponse>> {
     const userData = await this.authService.createUser(signupInput);
     const {
       tokens: { accessToken, refreshToken },
       user,
     } = userData;
     return {
-      message: `${user.email} user Signed up successfully`,
       status: HttpStatus.CREATED,
-      url: '/auth/signup',
       data: {
         user,
         tokens: {
@@ -52,16 +50,14 @@ export class AuthController {
   @IsPublic()
   async login(
     @Body() { email, password }: LoginInput,
-  ): Promise<ResponseObject<LoginResponse>> {
+  ): Promise<ApiResponse<LoginResponse>> {
     const {
       tokens: { accessToken, refreshToken },
       user,
     } = await this.authService.login(email.toLowerCase(), password);
 
     return {
-      message: `${email} user logged in successfully`,
       status: HttpStatus.OK,
-      url: '/auth/login',
       data: {
         user,
         tokens: { accessToken, refreshToken },
@@ -76,17 +72,10 @@ export class AuthController {
     @Query('callback') callback: string,
   ) {
     const link = await this.authService.verifyUserEmail(email, callback);
-    // await this.mailerService.sendMail(
-    //   {
-    //     name: email,
-    //     verificationLink: link,
-    //     companyName: 'Coding Ninja',
-    //   },
-    //   'action',
-    //   email,
-    // );
+
     return {
       status: HttpStatus.OK,
+      link,
     };
   }
 
@@ -109,13 +98,13 @@ export class AuthController {
   @Get('refresh-token')
   @IsPublic()
   async refreshToken(@Req() req: Request) {
-    const refreshTokenString = req.headers['cookie'];
-    if (!refreshTokenString) {
-      throw new Error('No refresh token found');
+    const cookies = req.headers['cookie'];
+    if (!cookies) {
+      throw new Error('No cookies found');
     }
-    const token = refreshTokenString.split('=')[1].split(';')[0];
+    const refreshTokenString = cookies.split('refreshToken=')[1].split(';')[0];
 
-    return this.authService.refreshToken(token);
+    return this.authService.refreshToken(refreshTokenString);
   }
 
   @Get('user/:access_token')
@@ -126,11 +115,14 @@ export class AuthController {
   @Post('update-role/:id')
   @IsPublic()
   @ApiBody({ enum: UserRole, isArray: true })
-  async updateRole(@Param('id') id: string, @Body() role: UserRole[]) {
+  async updateRole(
+    @Param('id') id: string,
+    @Body() role: UserRole[],
+  ): Promise<ApiResponse<any>> {
     const data = await this.authService.updateUserRole(id, role);
 
     return {
-      message: 'User role updated',
+      status: HttpStatus.OK,
       data,
     };
   }

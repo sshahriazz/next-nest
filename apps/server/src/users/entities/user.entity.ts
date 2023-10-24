@@ -1,13 +1,6 @@
+import CommonEntity from '@server/common/configs/common-entity';
 import { Resume } from '@server/resume/entity/resume.entity';
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -15,10 +8,7 @@ export enum UserRole {
 }
 
 @Entity('user')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class User extends CommonEntity {
   @Column({ type: 'varchar', unique: true })
   email: string;
 
@@ -58,10 +48,5 @@ export class User {
     cascade: true,
     eager: true,
   })
-  resume: Resume[];
-
-  @CreateDateColumn()
-  createdAt: Date;
-  @UpdateDateColumn()
-  updatedAt: Date;
+  resumes: Resume[];
 }

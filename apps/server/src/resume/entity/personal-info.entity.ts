@@ -1,5 +1,5 @@
 import CommonEntity from '@server/common/configs/common-entity';
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { Resume } from './resume.entity';
 
 export interface OtherSocialLink {
@@ -64,6 +64,6 @@ export class PersonalInfo extends CommonEntity {
     nullable: true,
   })
   additionalFields?: AdditionalField[];
-  @OneToOne(() => Resume, (resume) => resume.personalInfo)
+  @ManyToOne(() => Resume, (resume) => resume.personalInfos)
   resume: Resume;
 }

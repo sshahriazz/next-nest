@@ -9,7 +9,6 @@ export class SkillCategory extends CommonEntity {
   name: string;
 
   @OneToMany(() => Skill, (skill) => skill.skillCategory, {
-    onDelete: 'CASCADE',
     cascade: true,
   })
   skills: Skill[];

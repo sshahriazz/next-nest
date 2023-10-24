@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PersonalInfo } from '../entity/personal-info.entity';
 
 export class OtherSocialLinkDto {
   @ApiProperty({ type: String })
@@ -14,7 +15,7 @@ export class AdditionalFieldDto {
   value: string;
 }
 
-export class CreatePersonalInfoDto {
+export class CreatePersonalInfoDto extends PersonalInfo {
   @ApiProperty({ type: String })
   firstname: string;
   @ApiProperty({ type: String })
@@ -44,3 +45,5 @@ export class CreatePersonalInfoDto {
   @ApiProperty({ type: AdditionalFieldDto, isArray: true })
   additionalFields: AdditionalFieldDto[];
 }
+
+export class UpdateProfessionalSummaryDto extends CreatePersonalInfoDto {}

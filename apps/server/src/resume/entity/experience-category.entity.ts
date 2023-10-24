@@ -19,7 +19,6 @@ export class ExperienceCategory extends CommonEntity {
   description: string;
 
   @OneToMany(() => Experience, (experience) => experience.category, {
-    onDelete: 'CASCADE',
     cascade: true,
   })
   experiences: Experience[];

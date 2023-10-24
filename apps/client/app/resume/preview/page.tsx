@@ -49,10 +49,29 @@ const resumeDummy = {
 
 function ResumePreview() {
   return (
-    <>
-      <PersonalInfo personalInfo={resumeDummy.personalInfo} />
-      <Summary summary={resumeDummy.summary} />
-    </>
+    <div className="w-[210mm] p-6 border">
+      <PersonalInfo
+        socialLinkPosition="bottom"
+        avatarEnabled
+        classNames={{
+          base: "flex border p-4 rounded shadow-lg flex-col gap-5 transition-all duration-300 ease-in-out",
+          profileWrapper: "flex gap-3",
+          nameText: "text-5xl font-bold",
+          // socialLinkWrapper: "flex justify-between gap-3",
+          // renderLinkWrapper: "flex gap-3",
+        }}
+        summaryEnabled
+        renderSocial
+        avatarMode="avatar"
+        imageProps={{ isZoomed: true }}
+        avatarProps={{
+          size: "lg",
+          isBordered: true,
+          className: "w-20 h-20",
+          radius: "sm",
+        }}
+      />
+    </div>
   );
 }
 

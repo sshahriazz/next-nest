@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { DbConfig } from './common/configs/config.interface';
 import { TypeOrmExceptionFilter } from './common/filters/TypeOrmExceptionFilter';
 import { ResumeModule } from './resume/resume.module';
+import { JwtAuthGuard } from './auth/jwt.guard';
+import { RoleGuard } from './auth/role/role.guard';
 
 @Module({
   imports: [
@@ -48,14 +50,14 @@ import { ResumeModule } from './resume/resume.module';
       provide: APP_FILTER,
       useClass: TypeOrmExceptionFilter,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard,
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RoleGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

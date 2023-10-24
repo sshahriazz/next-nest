@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Entity, ManyToOne, OneToMany } from 'typeorm';
 import { PersonalInfo } from './personal-info.entity';
 import { ProfessionalSummary } from './pro-summary.entity';
 import { ExperienceCategory } from './experience-category.entity';
@@ -13,65 +13,62 @@ import { User } from '@server/users/entities/user.entity';
 
 @Entity('resume')
 export class Resume extends CommonEntity {
-  @OneToOne(() => PersonalInfo, (personalInfo) => personalInfo.resume, {
+  @OneToMany(() => PersonalInfo, (personalInfo) => personalInfo.resume, {
     cascade: true,
+    eager: true,
   })
-  @JoinColumn()
-  personalInfo: PersonalInfo;
+  personalInfos: PersonalInfo[];
 
-  @OneToOne(
+  @OneToMany(
     () => ProfessionalSummary,
     (professionalSummary) => professionalSummary.resume,
     {
       cascade: true,
+      eager: true,
     },
   )
-  @JoinColumn()
-  professionalSummary: ProfessionalSummary;
+  professionalSummaries: ProfessionalSummary[];
 
   @OneToMany(
     () => ExperienceCategory,
     (experienceCategory) => experienceCategory.resume,
-    { onDelete: 'CASCADE', cascade: true },
+    { cascade: true, eager: true },
   )
   experienceCategories: ExperienceCategory[];
 
   @OneToMany(() => Education, (education) => education.resume, {
-    onDelete: 'CASCADE',
     cascade: true,
+    eager: true,
   })
   educations: Education[];
 
   @OneToMany(() => SkillCategory, (skillCategory) => skillCategory.resume, {
-    onDelete: 'CASCADE',
     cascade: true,
+    eager: true,
   })
   skillCategories: SkillCategory[];
 
   @OneToMany(() => Course, (course) => course.resume, {
-    onDelete: 'CASCADE',
     cascade: true,
+    eager: true,
   })
   courses: Course[];
   @OneToMany(() => Certificate, (certificate) => certificate.resume, {
-    onDelete: 'CASCADE',
     cascade: true,
+    eager: true,
   })
   certificates: Certificate[];
   @OneToMany(() => Interest, (interest) => interest.resume, {
-    onDelete: 'CASCADE',
     cascade: true,
+    eager: true,
   })
   interests: Interest[];
   @OneToMany(() => Additional, (additional) => additional.resume, {
-    onDelete: 'CASCADE',
     cascade: true,
+    eager: true,
   })
   additionalInfos: Additional[];
 
-  @ManyToOne(() => User, (user) => user.resume, {
-    onDelete: 'CASCADE',
-    nullable: false,
-  })
+  @ManyToOne(() => User, (user) => user.resumes)
   author: User;
 }

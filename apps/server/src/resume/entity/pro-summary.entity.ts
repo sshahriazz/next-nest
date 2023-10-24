@@ -1,5 +1,5 @@
 import CommonEntity from '@server/common/configs/common-entity';
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { Resume } from './resume.entity';
 
 export enum SummaryType {
@@ -15,6 +15,6 @@ export class ProfessionalSummary extends CommonEntity {
   @Column({ type: 'varchar', nullable: false, default: '' })
   summary: string;
 
-  @OneToOne(() => Resume, (resume) => resume.professionalSummary)
+  @ManyToOne(() => Resume, (resume) => resume.professionalSummaries)
   resume: Resume;
 }

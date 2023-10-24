@@ -41,6 +41,8 @@ const config: Config = {
     expiresIn: '200m',
     refreshIn: '7d',
     bcryptSaltOrRound: 10,
+    refreshSecret: 'my-refresh-secret',
+    accessSecret: 'my-access-secret',
   },
 };
 

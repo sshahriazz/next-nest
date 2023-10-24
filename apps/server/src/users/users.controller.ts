@@ -11,8 +11,6 @@ import { UsersService } from './users.service';
 import { UpdateUserInput } from './dto/update-user.input';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ChangePasswordInput } from './dto/change-password.input';
-import { UserRole } from './entities/user.entity';
-import { Roles } from '@server/auth/roles/roles.decorator';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -22,9 +20,9 @@ export class UsersController {
 
   @Get()
   // @IsPublic()
-  @Roles(UserRole.USER)
-  findAll() {
-    return this.usersService.listUser();
+  // @Roles(UserRole.USER)
+  async findAll() {
+    return await this.usersService.listUser();
   }
 
   @Get(':id')

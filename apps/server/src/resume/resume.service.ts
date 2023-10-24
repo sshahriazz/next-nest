@@ -133,8 +133,14 @@ export class ResumeService {
   }
 
   async createResume(resume: CreateResumeDto) {
+    // const personalInfo = this.personalInfoRepository.create(new PersonalInfo());
+    // const professionalSummary = this.summaryRepository.create(
+    //   new ProfessionalSummary(),
+    // );
     return await this.resumeRepository.save({
       author: { id: resume.authorId },
+      // personalInfos: [personalInfo],
+      // professionalSummaries: [professionalSummary],
     });
   }
 
@@ -152,7 +158,7 @@ export class ResumeService {
       ...this.queryConfig,
       where: { author: { id: userId } },
       loadEagerRelations: true,
-      relations: ['author', 'personalInfo', 'professionalSummary'],
+      relations: ['author', 'personalInfos', 'professionalSummaries'],
       sortableColumns: ['id', 'createdAt', 'updatedAt'],
       nullSort: 'last',
       defaultSortBy: [['createdAt', 'DESC']],
@@ -162,7 +168,7 @@ export class ResumeService {
   async listResume(query: PaginateQuery): Promise<Paginated<Resume>> {
     return await Paginate(query, this.resumeRepository, {
       loadEagerRelations: true,
-      relations: ['author', 'personalInfo', 'professionalSummary'],
+      relations: ['author', 'personalInfos', 'professionalSummaries'],
       sortableColumns: ['id', 'createdAt', 'updatedAt'],
       nullSort: 'last',
       defaultSortBy: [['createdAt', 'DESC']],
@@ -177,9 +183,8 @@ export class ResumeService {
     resumeId: string,
     personalInfo: CreatePersonalInfoDto,
   ) {
-    const existing = await this.resumeRepository.findOne({
+    const existing = await this.personalInfoRepository.findOne({
       where: { id: resumeId },
-      relations: ['personalInfo'],
     });
 
     const newPersonalInfoData = await this.personalInfoRepository.save({
@@ -187,12 +192,12 @@ export class ResumeService {
       ...personalInfo,
     });
     const updatedResume = await this.resumeRepository.update(resumeId, {
-      personalInfo: { id: newPersonalInfoData.id },
+      personalInfos: [{ id: newPersonalInfoData.id }],
     });
 
     if (updatedResume.affected > 0) {
-      if (existing?.personalInfo?.id) {
-        await this.personalInfoRepository.delete(existing.personalInfo.id);
+      if (existing?.id) {
+        await this.personalInfoRepository.delete(existing.id);
       }
 
       return newPersonalInfoData;
@@ -217,9 +222,6 @@ export class ResumeService {
   async listPersonalInfo(
     query: PaginateQuery,
   ): Promise<Paginated<PersonalInfo>> {
-    const queryBuilder =
-      this.personalInfoRepository.createQueryBuilder('personal_info');
-    queryBuilder.orderBy('personal_info.createdAt', 'DESC');
     return await Paginate(query, this.personalInfoRepository, {
       loadEagerRelations: true,
       relations: ['resume'],
@@ -237,20 +239,19 @@ export class ResumeService {
     resumeId: string,
     summaryDto: CreateProfessionalSummaryDto,
   ) {
-    const existing = await this.resumeRepository.findOne({
+    const existing = await this.summaryRepository.findOne({
       where: { id: resumeId },
-      relations: ['professionalSummary'],
     });
     const newSummaryData = await this.summaryRepository.save({
       resume: { id: resumeId },
       ...summaryDto,
     });
     const updatedResume = await this.resumeRepository.update(resumeId, {
-      professionalSummary: { id: newSummaryData.id },
+      professionalSummaries: [{ id: newSummaryData.id }],
     });
     if (updatedResume.affected > 0) {
-      if (existing?.professionalSummary?.id) {
-        await this.summaryRepository.delete(existing.professionalSummary.id);
+      if (existing?.id) {
+        await this.summaryRepository.delete(existing.id);
       }
 
       return newSummaryData;

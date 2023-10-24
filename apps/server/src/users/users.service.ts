@@ -14,7 +14,9 @@ export class UsersService {
   ) {}
 
   async listUser() {
-    return await this.userRepository.find();
+    return await this.userRepository.find({
+      select: ['id', 'email', 'firstname', 'lastname', 'role', 'createdAt'],
+    });
   }
   async singleUser({ id }: { id: string }) {
     const user = await this.userRepository.findOneOrFail({ where: { id } });
