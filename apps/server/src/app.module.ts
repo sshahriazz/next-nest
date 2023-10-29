@@ -50,14 +50,14 @@ import { RoleGuard } from './auth/role/role.guard';
       provide: APP_FILTER,
       useClass: TypeOrmExceptionFilter,
     },
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RoleGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RoleGuard,
+    // },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

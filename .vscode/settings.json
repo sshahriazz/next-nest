@@ -1,11 +1,11 @@
 {
-    "editor.codeLens": false,
-    "cSpell.words": [
-        "deduping",
-        "messageformat",
-        "nextui",
-        "Signup",
-        "tanstack",
-        "typeorm"
-    ]
+  "editor.codeLens": false,
+  "cSpell.words": [
+    "deduping",
+    "messageformat",
+    "nextui",
+    "Signup",
+    "tanstack",
+    "typeorm"
+  ]
 }

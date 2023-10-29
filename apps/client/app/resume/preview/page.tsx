@@ -51,7 +51,7 @@ function ResumePreview() {
   return (
     <div className="w-[210mm] p-6 border">
       <PersonalInfo
-        socialLinkPosition="bottom"
+        socialLinkPosition="right"
         avatarEnabled
         classNames={{
           base: "flex border p-4 rounded shadow-lg flex-col gap-5 transition-all duration-300 ease-in-out",
